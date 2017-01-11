@@ -29,25 +29,33 @@ public class Robot extends SampleRobot {
     	long time;
 	    thrower.setSpeed(1000);
     	while (isOperatorControl() && isEnabled()) {
+    		time = Common.time();
+    		
     		if (j.getAButton()) {
     			SmartDashboard.putBoolean("A Button", j.getAButton());
     		}
     		
-    		if (j.getBackButton()) {
-    			SmartDashboard.getBoolean("Back Button", j.getBackButton());
-    		}
-    		
-    		if (j.getStickButton()) {
-    			SmartDashboard.getBoolean("Right Stick", j.getStickButton(GenericHID.Hand.kRight));
-    		}
-    	   time = Common.time();
     	   //Do stuff
     	   thrower.update();
+    	   SmartDashboard.putNumber("encoder", thrower.encoder.get());
+    	   
     	   Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);
     	}
     }
 
     public void test() {
     	
+    }
+    
+    public void disabled() {
+    	long time;
+        
+        while(true) {
+     	   time = Common.time();
+     	   
+     	   SmartDashboard.putNumber("encoder", thrower.encoder.get());
+     	   
+     	   Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);
+        }
     }
 }
