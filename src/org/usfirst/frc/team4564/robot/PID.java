@@ -1,5 +1,7 @@
 package org.usfirst.frc.team4564.robot;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 public class PID {
 	//Terms
 	private double p;
@@ -29,9 +31,9 @@ public class PID {
 		this.forward = forward;
 		this.deltaTime = (long)(1.0/Constants.REFRESH_RATE*1000);
 		
-		Robot.table.putNumber(name + "P", p);
-		Robot.table.putNumber(name + "I", i);
-		Robot.table.putNumber(name + "D", d);
+		SmartDashboard.putNumber(name + "P", p);
+		SmartDashboard.putNumber(name + "I", i);
+		SmartDashboard.putNumber(name + "D", d);
 	}
 	
 	public void update() {

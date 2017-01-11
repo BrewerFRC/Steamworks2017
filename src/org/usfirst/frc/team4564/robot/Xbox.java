@@ -1,6 +1,5 @@
 package org.usfirst.frc.team4564.robot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController
 
 
 public class Xbox extends Joystick{
@@ -10,5 +9,6 @@ public class Xbox extends Joystick{
 	}
 	
 	public boolean getAButton() {
+		return false;
 	}
 }

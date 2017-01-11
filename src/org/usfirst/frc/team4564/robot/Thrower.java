@@ -3,12 +3,13 @@ package org.usfirst.frc.team4564.robot;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Thrower {
 	private PID pid;
 	private Spark flywheel;
 	
-	private Encoder encoder;
+	public Encoder encoder;
 	private int lastCount;
 	
 	private boolean spinning;
@@ -49,6 +50,7 @@ public class Thrower {
 	
 	public int getRPM() {
 		int rpm = (encoder.get() - lastCount) / Constants.FLYWHEEL_COUNTS_PER_ROT;
+		SmartDashboard.putNumber("rpm", rpm);
 		lastCount = encoder.get();
 		return rpm;
 	}
