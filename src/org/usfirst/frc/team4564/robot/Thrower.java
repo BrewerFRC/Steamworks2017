@@ -48,7 +48,7 @@ public class Thrower {
 	}
 	
 	public int getRPM() {
-		int rpm = encoder.get() / Constants.FLYWHEEL_COUNTS_PER_ROT;
+		int rpm = (encoder.get() - lastCount) / Constants.FLYWHEEL_COUNTS_PER_ROT;
 		lastCount = encoder.get();
 		return rpm;
 	}
