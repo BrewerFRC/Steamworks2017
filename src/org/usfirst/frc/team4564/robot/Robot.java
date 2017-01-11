@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 public class Robot extends SampleRobot {
 	public static XboxController j = new XboxController(0);
@@ -29,6 +31,14 @@ public class Robot extends SampleRobot {
     	while (isOperatorControl() && isEnabled()) {
     		if (j.getAButton()) {
     			SmartDashboard.putBoolean("A Button", j.getAButton());
+    		}
+    		
+    		if (j.getBackButton()) {
+    			SmartDashboard.getBoolean("Back Button", j.getBackButton());
+    		}
+    		
+    		if (j.getStickButton()) {
+    			SmartDashboard.getBoolean("Right Stick", j.getStickButton(GenericHID.Hand.kRight));
     		}
     	   time = Common.time();
     	   //Do stuff
