@@ -1,5 +1,14 @@
 /bin
+
+/build
+
+/dist
+
+
 .classpath
+
 .project
+
 build.xml
+
 build.properties
