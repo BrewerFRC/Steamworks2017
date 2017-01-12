@@ -20,12 +20,15 @@ public class Common {
 	public static void dashNum(String title, int a) {
 		SmartDashboard.putNumber(title + ": ", a);
 	}
+	
 	public static void dashNum(String title, double a) {
 		SmartDashboard.putNumber(title + ": ", a);
 	}
+	
 	public static void dashBool(String Title, boolean a) {
 		SmartDashboard.putBoolean(Title, a);
 	}
+	
 	public static long time() {
 		return Calendar.getInstance().getTimeInMillis();
 	}
