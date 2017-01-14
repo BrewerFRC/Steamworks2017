@@ -1,11 +1,17 @@
 package org.usfirst.frc.team4564.robot;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Xbox extends XboxController{
+	
+	private Map<String, Supplier<Boolean>> functionWhen;
 
 	public Xbox(int port) {
 		super(port);
+		setupFunctions();
 	}
 	
 	//Deadzone
@@ -25,7 +31,7 @@ public class Xbox extends XboxController{
 	
 	//Rising edge function
 	public boolean when(Function) {
-		if(Function()) {
+		if(FunctionValue()) {
 			if(prev(Function())) {
 				return false;
 			} else {
@@ -46,5 +52,9 @@ public class Xbox extends XboxController{
 	
 	public double getLeftTrigger() {
 		return deadzone(getTriggerAxis(GenericHID.Hand.kLeft));
+	}
+	
+	public void setupFunctions() {
+		
 	}
 }
