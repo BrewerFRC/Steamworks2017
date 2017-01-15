@@ -16,7 +16,10 @@ public class Thrower {
 	
 	public Thrower(double p, double i, double d) {
 		pid = new PID(p, i, d, true, "thrower");
+		pid.setMax(1.0);
+		pid.setMin(-1.0);
 		flywheel = new Spark(Constants.PWM_FLYWHEEL);
+		flywheel.setInverted(true);
 		encoder = new Encoder(Constants.DIO_FLYWHEEL_ENCODER_A,
 				Constants.DIO_FLYWHEEL_ENCODER_B,
 				false, EncodingType.k4X);
@@ -40,9 +43,11 @@ public class Thrower {
 	}
 	
 	public void update() {
-		pid.update();
+		//pid.update();
 		if (spinning) {
-			flywheel.set(pid.calc(getRPM()));
+			double speed = pid.calc(getRPM());
+			SmartDashboard.putNumber("pidCalc", speed);
+			flywheel.set(speed);
 		}
 		else {
 			flywheel.set(0);
@@ -50,7 +55,6 @@ public class Thrower {
 	}
 	
 	public int getRPM() {
-		System.out.println("rpm");
 		int rpm = (int)(encoder.getRate() * 60);
 		SmartDashboard.putNumber("rpm", rpm);
 		lastCount = encoder.get();

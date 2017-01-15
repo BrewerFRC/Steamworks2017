@@ -6,13 +6,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID;
 
 public class Robot extends SampleRobot {
-	public static Xbox j = new Xbox(0);
+	private Xbox j ;
 	public static NetworkTable table;
-	public Thrower thrower;
+	private Thrower thrower;
 	
     public Robot() {
+    	j = new Xbox(0);
     	table = NetworkTable.getTable("table");
-    	thrower = new Thrower(0.001, 0, 0);
+    	thrower = new Thrower(0.000012, 0, 0.008);
     }
     
     public void robotInit() {
@@ -25,9 +26,9 @@ public class Robot extends SampleRobot {
     
     public void operatorControl() {
     	long time;
-	    thrower.setSpeed(0);
+	    thrower.setSpeed(3300);
 	    thrower.on();
-    	while (true) {
+    	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		//Tests for new Xbox controls
     		Common.dashBool("A Button", j.getAButton());
@@ -45,7 +46,8 @@ public class Robot extends SampleRobot {
     		//End of Xbox tests
     		SmartDashboard.putNumber("encoder", thrower.encoder.get());
     	   thrower.update();
-    	   Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);
+    	   Timer.delay(1.0/50);
+    	   //Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);
     	}
     }
 

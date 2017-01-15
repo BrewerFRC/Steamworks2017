@@ -83,6 +83,8 @@ public class PID {
 		
 		//Calculate output
 		double output = p*error + i*sumError + d*derivative;
+		SmartDashboard.putNumber("pidPCalc", output);
+		SmartDashboard.putNumber("pidError", error);
 		output = Math.min(Math.max(output, min), max);
 		if (forward) {
 			this.output += output;
