@@ -12,7 +12,7 @@ public class Robot extends SampleRobot {
 	
     public Robot() {
     	table = NetworkTable.getTable("table");
-    	thrower = new Thrower(0.1, 0, 0);
+    	thrower = new Thrower(0.001, 0, 0);
     }
     
     public void robotInit() {
@@ -25,10 +25,10 @@ public class Robot extends SampleRobot {
     
     public void operatorControl() {
     	long time;
-	    thrower.setSpeed(1000);
-    	while (isOperatorControl() && isEnabled()) {
+	    thrower.setSpeed(0);
+	    thrower.on();
+    	while (true) {
     		time = Common.time();
-    		
     		//Tests for new Xbox controls
     		Common.dashBool("A Button", j.getAButton());
     		Common.dashBool("Right Bumper", j.getBumper(GenericHID.Hand.kRight));
@@ -43,7 +43,7 @@ public class Robot extends SampleRobot {
 				}
     		}
     		//End of Xbox tests
-
+    		SmartDashboard.putNumber("encoder", thrower.encoder.get());
     	   thrower.update();
     	   Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);
     	}
@@ -54,14 +54,5 @@ public class Robot extends SampleRobot {
     }
     
     public void disabled() {
-    	long time;
-        
-        while(true) {
-     	   time = Common.time();
-     	   
-     	   SmartDashboard.putNumber("encoder", thrower.encoder.get());
-     	   
-     	   Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);
-        }
     }
 }

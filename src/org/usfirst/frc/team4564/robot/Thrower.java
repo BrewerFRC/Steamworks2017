@@ -25,6 +25,7 @@ public class Thrower {
 		encoder = new Encoder(Constants.DIO_FLYWHEEL_ENCODER_A,
 				Constants.DIO_FLYWHEEL_ENCODER_B,
 				false, EncodingType.k4X);
+		encoder.setDistancePerPulse(1.0 / Constants.FLYWHEEL_COUNTS_PER_ROT);
 	}
 	
 	public void on() {
@@ -50,7 +51,8 @@ public class Thrower {
 	}
 	
 	public int getRPM() {
-		int rpm = (encoder.get() - lastCount) / Constants.FLYWHEEL_COUNTS_PER_ROT;
+		System.out.println("rpm");
+		int rpm = (int)(encoder.getRate() * 60);
 		SmartDashboard.putNumber("rpm", rpm);
 		lastCount = encoder.get();
 		return rpm;
