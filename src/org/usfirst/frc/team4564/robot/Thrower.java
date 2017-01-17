@@ -64,6 +64,8 @@ public class Thrower {
 	
 	public boolean ready() {
 		//EVAN, please put in your logic for determining if target set in PID has been reached (with deadzone), thanks, -Jacob
+		return true;
+		
 	}
 	
 	//Methods for state cases
@@ -80,6 +82,7 @@ public class Thrower {
 	//Sets flywheel feeder to input value
 	public double setFeederIntake(double input) {
 		//EVAN, please put in how you want to set motor power for flywheel intake motor, thanks, -Jacob
+		return (1.0);
 	}
 	
 	public void stopFlywheel() {
