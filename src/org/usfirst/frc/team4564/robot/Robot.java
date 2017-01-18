@@ -8,10 +8,12 @@ import edu.wpi.first.wpilibj.GenericHID;
 public class Robot extends SampleRobot {
 	private Xbox j ;
 	public static NetworkTable table;
-	private Thrower thrower;
+	private static Thrower thrower;
+	private boolean prevRightTrigger;
 	
     public Robot() {
     	j = new Xbox(0);
+    	prevRightTrigger = false;
     	table = NetworkTable.getTable("table");
     	thrower = new Thrower(0.000012, 0, 0.008);
     }
@@ -26,11 +28,23 @@ public class Robot extends SampleRobot {
     
     public void operatorControl() {
     	long time;
-	    thrower.setSpeed(3300);
+	    //thrower.setSpeed(3300);
 	    thrower.setPIDOn(true);
 	    double flywheelSpeed = 0.5;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
+    		Common.debug("Right Joystick:"+ j.when("rightTrigger"));
+    		if(j.when("rightTrigger")) {
+    			if(prevRightTrigger == false) {
+    				Common.dashStr("Turning on Fire", "");
+    				thrower.state.fire();
+    				prevRightTrigger = true;
+    			} else {
+    				Common.dashStr("Turning off fire", "");
+    				thrower.state.stopFiring();
+    				prevRightTrigger = false;
+    			}
+    		}
     		
     		if (j.getXButton()) {
     			thrower.setPIDOn(false);
