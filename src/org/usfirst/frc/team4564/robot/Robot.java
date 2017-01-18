@@ -37,27 +37,28 @@ public class Robot extends SampleRobot {
     			thrower.setFlywheelSpeed(flywheelSpeed);
     		}
     		else {
+    			thrower.setPIDOn(true);
     			int direction = 0;
     			if (j.when("dPadUp")) {
     				System.out.println("dPadUp");
-    				//direction = 1;
+    				direction = 1;
     			}
     			else if (j.when("dPadDown")) {
     				System.out.println("dPadDown");
-    				//direction = -1;
+    				direction = -1;
     			}
     			PID pid = thrower.getPID();
     			if (j.getYButton()) {
-        			thrower.setPIDOn(true);
         			pid.setP(pid.getP() + direction*0.000002);
+        			SmartDashboard.putNumber("pidP", pid.getP());
         		}
         		else if (j.getBButton()) {
-        			thrower.setPIDOn(true);
         			pid.setI(pid.getI() + direction*0.000002);
+        			SmartDashboard.putNumber("pidI", pid.getI());
         		}
         		else if (j.getAButton()) {
-        			thrower.setPIDOn(true);
         			pid.setD(pid.getD() + direction*0.001);
+        			SmartDashboard.putNumber("pidD", pid.getD());
         		}
     		}
     		

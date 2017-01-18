@@ -65,13 +65,16 @@ public class Xbox extends XboxController{
 	}
 	
 	public boolean when(String button) {
+		//TODO: Debounce buttons
 		if (!whenMap.containsKey(button)) {
 			return false;
 		}
 		
-		if (getPressed(button) && !whenMap.get(button)) {
-			whenMap.put(button, true);
-			return true;
+		if (getPressed(button)) {
+			if (!whenMap.get(button)) {
+				whenMap.put(button, true);
+				return true;
+			}
 		}
 		else {
 			whenMap.put(button, false);

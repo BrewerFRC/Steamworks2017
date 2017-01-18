@@ -2,7 +2,6 @@ package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -51,9 +50,6 @@ public class Thrower {
 			double speed = pid.calc(getRPM());
 			SmartDashboard.putNumber("pidCalc", speed);
 			flywheel.set(speed);
-		}
-		else {
-			flywheel.set(0);
 		}
 	}
 	
