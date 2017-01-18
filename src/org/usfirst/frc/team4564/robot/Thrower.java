@@ -14,10 +14,11 @@ public class Thrower {
 	private int lastCount;
 	private boolean spinning;
 	
+	//global variables for throwerState class
 	public ThrowerState state;
 	public int flywheelRPM = 0; //Ideal RPM target for flywheel.
 	public int feederRate = 0;  //Ideal RPM for flywheel feeder.
-	public static long ejectTimer = 0;
+	public static long clearTimer = 0;
 	
 	public Thrower(double p, double i, double d) {
 		pid = new PID(p, i, d, true, "thrower");
@@ -62,35 +63,15 @@ public class Thrower {
 		return rpm;
 	}
 	
-	public boolean ready() {
-		//EVAN, please put in your logic for determining if target set in PID has been reached (with deadzone), thanks, -Jacob
-		return true;
-		
-	}
-	
 	//Methods for state cases
 	//Sets flywheel RPM
 	public void setSpeed(int rpm) {
 		pid.setTarget(rpm);
 	}
 	
-	//Spins up flywheel to determined RPM stored in flywheelRPM variable
-	public void spinUp() {
-		this.setSpeed(flywheelRPM);
-	}
-	
 	//Sets flywheel feeder to input value
 	public double setFeederIntake(double input) {
 		//EVAN, please put in how you want to set motor power for flywheel intake motor, thanks, -Jacob
-		return (1.0);
-	}
-	
-	public void stopFlywheel() {
-		this.setSpeed(0);
-	}
-	
-	public void feederEject() {
-		this.setFeederIntake(-1.0);
 	}
 	
 	public static class ThrowerState {
@@ -98,7 +79,7 @@ public class Thrower {
 		public static final int READY = 1;  //Ready to begin firing process
 		public static final int SPIN_UP = 2;  //Spin up flywheel to set RPM
 		public static final int READY_TO_FIRE = 3;  //Flywheel up to input speed
-		public static final int FIRING = 4;  //Flywheel feeder intakes ball at feeder rate
+		public static final int FIRE = 4;  //Flywheel feeder intakes ball at feeder rate
 		public static final int CLEAR_SHOOTER = 5;  //Stop motors, run feeder back to clear channel.
 		
 		private Thrower thrower;
@@ -110,53 +91,21 @@ public class Thrower {
 			verificationTimer = 0;
 			this.thrower = thrower;
 		}
-		
-		public void init() {
-			currentState = READY;
-		}
 
-		//Spin the flywheel up to speed to fire
-		public void prepForFire() {
-			if(currentState == SPIN_UP) {
-				thrower.spinUp();
-				if(thrower.ready()) {
-					currentState = READY_TO_FIRE;
-				} else {
-					currentState = SPIN_UP;
-				}
-			}
-		}
-		
-		//Make sure the operator is still asking for a ball to be fired.
-		public void verifyFireOrder() {
-			if(currentState == READY_TO_FIRE && j.getBumper(GenericHID.Hand.kRight) == true) {
-				currentState = FIRING;
+		public void fire() {
+			if(currentState == READY_TO_FIRE) {
+				currentState = FIRE;
 			} else { 
-				if(verificationTimer < 50) {
-					verificationTimer += 1;
-					verifyFireOrder();
-				} else {
-					currentState = CLEAR_SHOOTER;
-					verificationTimer = 0;
-				}
+				currentState = SPIN_UP;
 			}
 		}
 		
-		//Fire balls
-		public void fire() { 
-			thrower.setFeederIntake(thrower.feederRate);
-			verifyFireOrder();
+		public void spinUp() {
+			currentState = SPIN_UP;
 		}
 		
-		public void clear() {
-			if(currentState == CLEAR_SHOOTER) {
-				thrower.stopFlywheel();
-				thrower.feederEject();
-				ejectTimer = Common.time() + 500;
-				if(Common.time() >= ejectTimer) {
-					currentState = READY;
-				}
-			}
+		public void stopFiring() {
+			currentState = CLEAR_SHOOTER;
 		}
 		
 		public int update() {
@@ -166,19 +115,28 @@ public class Thrower {
 					break;
 				case SPIN_UP:
 					Common.dashStr("SPIN_UP:", "Spinning up flywheel");
-					this.prepForFire();
+					thrower.setSpeed(thrower.flywheelRPM);
+					if(thrower.ready()) {
+						currentState = READY_TO_FIRE;
+					} else {
+						currentState = SPIN_UP;
+					}
 					break;
 				case READY_TO_FIRE:
 					Common.dashStr("READY_TO_FIRE:", "Flywheel up to speed");
-					verifyFireOrder();
 					break;
-				case FIRING:
+				case FIRE:
 					Common.dashStr("FIRING", "Activating flywheel feeder, firing ball");
-					fire();
+					thrower.setFeederIntake(thrower.feederRate);
 					break;
 				case CLEAR_SHOOTER:
 					Common.dashStr("CLEAR:", "Clearing channel of balls");
-					clear();
+					thrower.setSpeed(0);
+					thrower.setFeederIntake(-1);
+					clearTimer = Common.time() + 500;
+					if(Common.time() >= clearTimer) {
+						currentState = READY;
+					}
 					break;
 			}
 			return currentState;
