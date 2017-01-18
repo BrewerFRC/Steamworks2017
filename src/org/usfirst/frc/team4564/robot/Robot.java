@@ -27,22 +27,41 @@ public class Robot extends SampleRobot {
     public void operatorControl() {
     	long time;
 	    thrower.setSpeed(3300);
-	    thrower.on();
+	    thrower.setPIDOn(true);
+	    double flywheelSpeed = 0.5;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		//Tests for new Xbox controls
-    		Common.dashBool("A Button", j.getAButton());
-    		Common.dashBool("Right Bumper", j.getBumper(GenericHID.Hand.kRight));
-    		Common.dashBool("Right Stick", j.getStickButton(GenericHID.Hand.kRight));
-    		Common.dashNum("Right Trigger", j.getTriggerAxis(GenericHID.Hand.kRight));
-    		Common.dashNum("DPAD", j.getPOV());
-    		if(j.getXButton()) {
-    			if(j.getRightTrigger() > 0 ) {
-    				j.setRumble((GenericHID.RumbleType.kLeftRumble), j.getRightTrigger());
-				} else if(j.getLeftTrigger() > 0 ) {
-					j.setRumble((GenericHID.RumbleType.kRightRumble), j.getLeftTrigger());
-				}
+    		
+    		if (j.getXButton()) {
+    			thrower.setPIDOn(false);
+    			thrower.setFlywheelSpeed(flywheelSpeed);
     		}
+    		else {
+    			int direction = 0;
+    			if (j.when("dPadUp")) {
+    				System.out.println("dPadUp");
+    				//direction = 1;
+    			}
+    			else if (j.when("dPadDown")) {
+    				System.out.println("dPadDown");
+    				//direction = -1;
+    			}
+    			PID pid = thrower.getPID();
+    			if (j.getYButton()) {
+        			thrower.setPIDOn(true);
+        			pid.setP(pid.getP() + direction*0.000002);
+        		}
+        		else if (j.getBButton()) {
+        			thrower.setPIDOn(true);
+        			pid.setI(pid.getI() + direction*0.000002);
+        		}
+        		else if (j.getAButton()) {
+        			thrower.setPIDOn(true);
+        			pid.setD(pid.getD() + direction*0.001);
+        		}
+    		}
+    		
+    		
     		//End of Xbox tests
     		SmartDashboard.putNumber("encoder", thrower.encoder.get());
     	   thrower.update();

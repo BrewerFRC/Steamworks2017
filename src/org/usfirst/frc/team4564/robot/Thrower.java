@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Thrower {
 	private PID pid;
 	private Spark flywheel;
+	private Spark feeder;
 	public Encoder encoder;
 	public static Xbox j = new Xbox(0);
 	private int lastCount;
@@ -31,16 +32,16 @@ public class Thrower {
 		encoder.setDistancePerPulse(1.0 / Constants.FLYWHEEL_COUNTS_PER_ROT);
 	}
 	
-	public void on() {
-		this.spinning = true;
+	public void setPIDOn(boolean on) {
+		this.spinning = on;
 	}
 	
-	public void off() {
-		this.spinning = false;
+	public PID getPID() {
+		return this.pid;
 	}
 	
-	public boolean isOn() {
-		return this.spinning;
+	public void setFlywheelSpeed(double speed) {
+		flywheel.set(speed);
 	}
 	
 	public void update() {
@@ -63,7 +64,7 @@ public class Thrower {
 	}
 	
 	public boolean ready() {
-		//EVAN, please put in your logic for determining if target set in PID has been reached (with deadzone), thanks, -Jacob
+		return Math.abs(pid.getTarget() - getRPM()) < Constants.FLYWHEEL_RPM_ALLOWED_ERROR;
 	}
 	
 	//Methods for state cases
@@ -78,8 +79,8 @@ public class Thrower {
 	}
 	
 	//Sets flywheel feeder to input value
-	public double setFeederIntake(double input) {
-		//EVAN, please put in how you want to set motor power for flywheel intake motor, thanks, -Jacob
+	public void setFeederIntake(double input) {
+		feeder.set(input);
 	}
 	
 	public void stopFlywheel() {

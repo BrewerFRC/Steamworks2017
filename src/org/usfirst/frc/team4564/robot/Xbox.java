@@ -64,7 +64,7 @@ public class Xbox extends XboxController{
 		return false;
 	}
 	
-	public boolean whenPressed(String button) {
+	public boolean when(String button) {
 		if (!whenMap.containsKey(button)) {
 			return false;
 		}
@@ -99,7 +99,7 @@ public class Xbox extends XboxController{
 		whenMap.put("back", false);
 		
 		functionMap.put("dPadUp", () -> {
-			return (this.getPOV() == -1) ? false : Math.abs(0 - this.getPOV()) < 45;
+			return (this.getPOV() == -1) ? false : Math.abs(0 - this.getPOV()) < 45 || Math.abs(360 - this.getPOV()) < 45;
 		});
 		whenMap.put("dPadUp", false);
 		

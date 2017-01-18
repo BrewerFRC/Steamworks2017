@@ -48,21 +48,35 @@ public class PID {
 	public void setMax(double max) {
 		this.max = max;
 	}
+	
 	public double getTarget() {
 		return this.target;
 	}
 	public void setTarget(double target) {
 		this.target = target;
 	}
+	
+	public double getP() {
+		return this.p;
+	}
 	public void setP(double p) {
 		this.p = p;
+	}
+	
+	public double getI() {
+		return this.i;
 	}
 	public void setI(double i) {
 		this.i = i;
 	}
+	
+	public double getD() {
+		return this.d;
+	}
 	public void setD(double d) {
 		this.d = d;
 	}
+	
 	public void reset() {
 		sumError = 0;
 		previousError = 0;
