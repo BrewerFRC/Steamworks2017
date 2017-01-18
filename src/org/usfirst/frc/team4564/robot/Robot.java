@@ -33,15 +33,16 @@ public class Robot extends SampleRobot {
 	    double flywheelSpeed = 0.5;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		Common.debug("Right Joystick:"+ j.when("rightTrigger"));
     		if(j.when("rightTrigger")) {
+    			Common.debug("Testing Triggers");
     			if(prevRightTrigger == false) {
-    				Common.dashStr("Turning on Fire", "");
+    				Common.debug("Turning on Fire");
     				thrower.state.fire();
     				prevRightTrigger = true;
     			} else {
-    				Common.dashStr("Turning off fire", "");
+    				Common.debug("Turning off Fire");
     				thrower.state.stopFiring();
+    				thrower.clearTimer = Common.time() + 500;
     				prevRightTrigger = false;
     			}
     		}
@@ -79,6 +80,7 @@ public class Robot extends SampleRobot {
     		
     		//End of Xbox tests
     		SmartDashboard.putNumber("encoder", thrower.encoder.get());
+    	   thrower.state.update();
     	   thrower.update();
     	   Timer.delay(1.0/50);
     	   //Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);

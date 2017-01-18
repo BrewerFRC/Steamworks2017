@@ -11,5 +11,5 @@ public class Constants {
 	public static final int REFRESH_RATE = 50;
 	
 	public static final int FLYWHEEL_COUNTS_PER_ROT = 1024;
-	public static final int FLYWHEEL_RPM_ALLOWED_ERROR = 100;
+	public static final int FLYWHEEL_RPM_ALLOWED_ERROR = 1000;
 }

@@ -20,8 +20,8 @@ public class Thrower {
 	
 	//global variables for throwerState class
 	public ThrowerState state;
-	public int flywheelRPM = 0; //Ideal RPM target for flywheel.
-	public int feederRate = 0;  //Ideal RPM for flywheel feeder.
+	public int flywheelRPM = 3300; //Ideal RPM target for flywheel.
+	public double feederRate = .5;  //Ideal RPM for flywheel feeder.
 	public static long clearTimer = 0;
 	
 	public Thrower(double p, double i, double d) {
@@ -100,12 +100,12 @@ public class Thrower {
 		}
 
 		public void fire() {
-			Common.dashStr("Fire Order Issued:", "Checking flywheel is ready.");
+			Common.debug("Fire Order Issued: Checking flywheel is ready.");
 			if(currentState == READY_TO_FIRE) {
-				Common.dashStr("Flywheel up to speed:", "Firing");
+				Common.debug("Flywheel up to speed: Firing");
 				currentState = FIRE;
 			} else { 
-				Common.dashStr("Flywheel not up to speed:", "begining firing process");
+				Common.debug("Flywheel not up to speed: begining firing process");
 				currentState = SPIN_UP;
 			}
 		}
@@ -121,10 +121,10 @@ public class Thrower {
 		public int update() {
 			switch(currentState) {
 				case READY:
-					Common.dashStr("READY:", "Ready to begin firing process");
+					Common.debug("READY: Ready to begin firing process");
 					break;
 				case SPIN_UP:
-					Common.dashStr("SPIN_UP:", "Spinning up flywheel");
+				Common.debug("SPIN_UP: Spinning up flywheel");
 					thrower.setSpeed(thrower.flywheelRPM);
 					if(thrower.ready()) {
 						currentState = READY_TO_FIRE;
@@ -133,18 +133,21 @@ public class Thrower {
 					}
 					break;
 				case READY_TO_FIRE:
-					Common.dashStr("READY_TO_FIRE:", "Flywheel up to speed");
+					Common.debug("READY_TO_FIRE: Flywheel up to speed");
+					currentState = FIRE;
 					break;
 				case FIRE:
-					Common.dashStr("FIRE", "Activating flywheel feeder, firing ball");
+					Common.debug("FIRE: Activating flywheel feeder, firing ball");
 					thrower.setFeederIntake(thrower.feederRate);
+					
 					break;
 				case CLEAR_SHOOTER:
-					Common.dashStr("CLEAR_SHOOTER:", "Clearing channel of balls");
+					Common.debug("CLEAR_SHOOTER: Clearing channel of balls");
+					thrower.setFeederIntake(0);
 					thrower.setSpeed(0);
 					thrower.setFeederIntake(-1);
-					clearTimer = Common.time() + 500;
 					if(Common.time() >= clearTimer) {
+						thrower.setFeederIntake(0);
 						currentState = READY;
 					}
 					break;

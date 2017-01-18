@@ -16,13 +16,8 @@
   <!-- By default the system team number is used -->
   <!-- <property name="team-number" value="4565"/> -->
 
-  <!-- By default the target is set to 10.TE.AM.2 -->
-<<<<<<< HEAD
-  <property name="target" value="10.45.65.2"/>
-
-=======
+  <!-- By default the target is set to 10.TE.AM.2 --> 
   <property name="target" value="10.45.65.2"/> 
->>>>>>> b4fb5f850d65a8a4a4ca280ceb942b63441c97b2
   <!-- Any other property in build.properties can also be overridden. -->
   
   <property file="${user.home}/wpilib/wpilib.properties"/>
