@@ -1,14 +1,18 @@
 package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+
+import org.usfirst.frc.team4564.robot.Thrower.ThrowerState;
+
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Thrower {
 	private PID pid;
 	private Spark flywheel;
-	private Spark feeder;
+	private Talon feeder;
 	public Encoder encoder;
 	public static Xbox j = new Xbox(0);
 	private int lastCount;
@@ -24,7 +28,9 @@ public class Thrower {
 		pid = new PID(p, i, d, true, "thrower");
 		pid.setMax(1.0);
 		pid.setMin(-1.0);
+		state = new ThrowerState(this);
 		flywheel = new Spark(Constants.PWM_FLYWHEEL);
+		feeder = new Talon(Constants.PWM_FEEDER_INTAKE);
 		flywheel.setInverted(true);
 		encoder = new Encoder(Constants.DIO_FLYWHEEL_ENCODER_A,
 				Constants.DIO_FLYWHEEL_ENCODER_B,
@@ -94,9 +100,12 @@ public class Thrower {
 		}
 
 		public void fire() {
+			Common.dashStr("Fire Order Issued:", "Checking flywheel is ready.");
 			if(currentState == READY_TO_FIRE) {
+				Common.dashStr("Flywheel up to speed:", "Firing");
 				currentState = FIRE;
 			} else { 
+				Common.dashStr("Flywheel not up to speed:", "begining firing process");
 				currentState = SPIN_UP;
 			}
 		}
@@ -127,11 +136,11 @@ public class Thrower {
 					Common.dashStr("READY_TO_FIRE:", "Flywheel up to speed");
 					break;
 				case FIRE:
-					Common.dashStr("FIRING", "Activating flywheel feeder, firing ball");
+					Common.dashStr("FIRE", "Activating flywheel feeder, firing ball");
 					thrower.setFeederIntake(thrower.feederRate);
 					break;
 				case CLEAR_SHOOTER:
-					Common.dashStr("CLEAR:", "Clearing channel of balls");
+					Common.dashStr("CLEAR_SHOOTER:", "Clearing channel of balls");
 					thrower.setSpeed(0);
 					thrower.setFeederIntake(-1);
 					clearTimer = Common.time() + 500;

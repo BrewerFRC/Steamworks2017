@@ -3,6 +3,7 @@ package org.usfirst.frc.team4564.robot;
 public class Constants {
 	
 	public static final int PWM_FLYWHEEL = 7;
+	public static final int PWM_FEEDER_INTAKE = 8;
 	
 	public static final int DIO_FLYWHEEL_ENCODER_A = 5;
 	public static final int DIO_FLYWHEEL_ENCODER_B = 6;
