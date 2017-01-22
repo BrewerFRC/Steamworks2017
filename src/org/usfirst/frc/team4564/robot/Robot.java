@@ -6,12 +6,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID;
 
 public class Robot extends SampleRobot {
+	private static Robot instance;
 	private Xbox j ;
 	public static NetworkTable table;
 	private static Thrower thrower;
 	private boolean prevRightTrigger;
 	
     public Robot() {
+    	instance = this;
     	j = new Xbox(0);
     	prevRightTrigger = false;
     	table = NetworkTable.getTable("table");
@@ -28,9 +30,8 @@ public class Robot extends SampleRobot {
     
     public void operatorControl() {
     	long time;
-	    //thrower.setSpeed(3300);
 	    thrower.setPIDOn(true);
-	    double flywheelSpeed = 0.5;
+	    double flywheelSpeed = -0.85;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		if(j.when("rightTrigger")) {
@@ -42,11 +43,16 @@ public class Robot extends SampleRobot {
     			} else {
     				Common.debug("Turning off Fire");
     				thrower.state.stopFiring();
-    				thrower.clearTimer = Common.time() + 500;
+    				thrower.state.clearTimer = Common.time() + 500;
     				prevRightTrigger = false;
     			}
     		}
-    		
+    		if (j.getPressed("rightBumper")) {
+    			thrower.setSpeed(3300);
+    		}
+    		else {
+    			thrower.setSpeed(0);
+    		}
     		if (j.getXButton()) {
     			thrower.setPIDOn(false);
     			thrower.setFlywheelSpeed(flywheelSpeed);
@@ -77,9 +83,10 @@ public class Robot extends SampleRobot {
         		}
     		}
     		
-    		
     		//End of Xbox tests
     		SmartDashboard.putNumber("encoder", thrower.encoder.get());
+    		SmartDashboard.putNumber("rpm", thrower.getRPM());
+    		SmartDashboard.putNumber("samplesToAverage", thrower.encoder.getSamplesToAverage());
     	   thrower.state.update();
     	   thrower.update();
     	   Timer.delay(1.0/50);
@@ -92,5 +99,9 @@ public class Robot extends SampleRobot {
     }
     
     public void disabled() {
+    }
+    
+    public static Robot getInstance() {
+    	return instance;
     }
 }

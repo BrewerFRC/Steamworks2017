@@ -11,18 +11,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Thrower {
 	private PID pid;
+	private EncoderRate rate;
 	private Spark flywheel;
 	private Talon feeder;
 	public Encoder encoder;
 	public static Xbox j = new Xbox(0);
-	private int lastCount;
 	private boolean spinning;
 	
 	//global variables for throwerState class
 	public ThrowerState state;
 	public int flywheelRPM = 3300; //Ideal RPM target for flywheel.
 	public double feederRate = .5;  //Ideal RPM for flywheel feeder.
-	public static long clearTimer = 0;
 	
 	public Thrower(double p, double i, double d) {
 		pid = new PID(p, i, d, true, "thrower");
@@ -36,6 +35,11 @@ public class Thrower {
 				Constants.DIO_FLYWHEEL_ENCODER_B,
 				false, EncodingType.k4X);
 		encoder.setDistancePerPulse(1.0 / Constants.FLYWHEEL_COUNTS_PER_ROT);
+		encoder.setSamplesToAverage(12);
+		
+		rate = new EncoderRate(encoder);
+		rate.setSampleRate(1000);
+		new Thread(rate).start();
 	}
 	
 	public void setPIDOn(boolean on) {
@@ -59,10 +63,9 @@ public class Thrower {
 		}
 	}
 	
-	public int getRPM() {
-		int rpm = (int)(encoder.getRate() * 60);
-		SmartDashboard.putNumber("rpm", rpm);
-		lastCount = encoder.get();
+	public double getRPM() {
+		//int rpm = (int)(encoder.getRate() * 60);s
+		double rpm = rate.getRate();
 		return rpm;
 	}
 	
@@ -92,6 +95,7 @@ public class Thrower {
 		private Thrower thrower;
 		private int currentState;
 		private long verificationTimer;
+		public long clearTimer;
 		
 		public ThrowerState(Thrower thrower) {
 			currentState = INIT;
