@@ -1,13 +1,10 @@
 package org.usfirst.frc.team4564.robot;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 public class PID {
 	//Terms
 	private double p;
 	private double i;
 	private double d;
-	private String name;
 	
 	/* 
 	 * Whether or not to cummulate values over time.
@@ -15,8 +12,9 @@ public class PID {
 	 */
 	private boolean forward;
 	private double target;
+	private double Outmin = -1;
+	private double Outmax = 1;
 	private double min;
-	private double max;
 	private long deltaTime;
 	private double previousError;
 	private double sumError;
@@ -27,56 +25,41 @@ public class PID {
 		this.p = p;
 		this.i = i;
 		this.d = d;
-		this.name = name;
 		this.forward = forward;
 		this.deltaTime = (long)(1.0/Constants.REFRESH_RATE*1000);
-		
-		SmartDashboard.putNumber(name + "P", p);
-		SmartDashboard.putNumber(name + "I", i);
-		SmartDashboard.putNumber(name + "D", d);
 	}
 	
-	public void update() {
-		this.p = Robot.table.getNumber(name + "P", this.p);
-		this.i = Robot.table.getNumber(name + "I", this.i);
-		this.d = Robot.table.getNumber(name + "D", this.d);
+	public void setOutputLimits(double min, double max){
+		this.Outmin = min;
+		this.Outmax = max;
 	}
-	
 	public void setMin(double min) {
 		this.min = min;
 	}
-	public void setMax(double max) {
-		this.max = max;
-	}
-	
 	public double getTarget() {
 		return this.target;
 	}
 	public void setTarget(double target) {
 		this.target = target;
 	}
-	
 	public double getP() {
 		return this.p;
 	}
 	public void setP(double p) {
 		this.p = p;
 	}
-	
 	public double getI() {
 		return this.i;
 	}
 	public void setI(double i) {
 		this.i = i;
 	}
-	
 	public double getD() {
 		return this.d;
 	}
 	public void setD(double d) {
 		this.d = d;
 	}
-	
 	public void reset() {
 		sumError = 0;
 		previousError = 0;
@@ -90,6 +73,7 @@ public class PID {
 		//Integral calculation
 		double error = input - target;
 		sumError += error * deltaTime;
+		int sign = -1;
 		
 		//Derivative calculation
 		double derivative = (error - previousError) / deltaTime;
@@ -97,9 +81,13 @@ public class PID {
 		
 		//Calculate output
 		double output = p*error + i*sumError + d*derivative;
-		SmartDashboard.putNumber("pidPCalc", output);
-		SmartDashboard.putNumber("pidError", error);
-		output = Math.min(Math.max(output, min), max);
+		if(output>0) 
+			sign = 1;
+		output = Math.abs(output)+ min;
+		output *= sign;
+		output = Math.min(Math.max(output, Outmin), Outmax);
+		
+
 		if (forward) {
 			this.output += output;
 		}
@@ -107,6 +95,7 @@ public class PID {
 			this.output = output;
 		}
 		lastCalc = this.output;
+		//Common.debug(this.name + "PID_OUT" + this.output );
 		return this.output;
 	}
 }

@@ -1,21 +1,27 @@
 package org.usfirst.frc.team4564.robot;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.GenericHID;
 
 public class Robot extends SampleRobot {
+	private static DriveTrain dt;
+	private static Thrower thrower;
+	private static GearVision gearVision;
+	
 	private Xbox j ;
 	public static NetworkTable table;
-	private static Thrower thrower;
+	
 	private boolean prevRightTrigger;
 	
     public Robot() {
+    	dt = new DriveTrain();
+    	thrower = new Thrower(0.000012, 0, 0.008);
+    	gearVision = new GearVision();
     	j = new Xbox(0);
     	prevRightTrigger = false;
-    	table = NetworkTable.getTable("table");
-    	thrower = new Thrower(0.000012, 0, 0.008);
     }
     
     public void robotInit() {
@@ -34,13 +40,10 @@ public class Robot extends SampleRobot {
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		if(j.when("rightTrigger")) {
-    			Common.debug("Testing Triggers");
     			if(prevRightTrigger == false) {
-    				Common.debug("Turning on Fire");
     				thrower.state.fire();
     				prevRightTrigger = true;
     			} else {
-    				Common.debug("Turning off Fire");
     				thrower.state.stopFiring();
     				thrower.clearTimer = Common.time() + 500;
     				prevRightTrigger = false;
@@ -55,11 +58,9 @@ public class Robot extends SampleRobot {
     			thrower.setPIDOn(true);
     			int direction = 0;
     			if (j.when("dPadUp")) {
-    				System.out.println("dPadUp");
     				direction = 1;
     			}
     			else if (j.when("dPadDown")) {
-    				System.out.println("dPadDown");
     				direction = -1;
     			}
     			PID pid = thrower.getPID();
@@ -77,13 +78,41 @@ public class Robot extends SampleRobot {
         		}
     		}
     		
+    		double forward = j.getY(GenericHID.Hand.kLeft) / 1.5;
+    		double turn = j.getX(GenericHID.Hand.kLeft) / 1.5;
+    		double slide = 0;
+    		if (j.getPressed("leftTrigger")) {
+    			slide = -j.getLeftTrigger();
+    		}
+    		else if (j.getPressed("rightTrigger")) {
+    			slide = j.getRightTrigger();
+    		}
+    		
+    		if (gearVision.checkReady()) {
+    			j.setRumble(RumbleType.kLeftRumble, 0.3);
+    			j.setRumble(RumbleType.kRightRumble, 0.3);
+    		}
+    		else if (!j.getPressed("a")) {
+    			j.setRumble(RumbleType.kLeftRumble, 0);
+    			j.setRumble(RumbleType.kRightRumble, 0);
+    		}
+    		if (j.when("a")) {
+    			gearVision.start();
+    		}
+    		if (j.getPressed("a")) {
+    			gearVision.track();
+    		}
+    		else {
+    			gearVision.reset();
+    			dt.setDrive(forward, turn, slide);
+    		}
     		
     		//End of Xbox tests
     		SmartDashboard.putNumber("encoder", thrower.encoder.get());
     	   thrower.state.update();
     	   thrower.update();
-    	   Timer.delay(1.0/50);
-    	   //Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);
+    	   
+    	   Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);
     	}
     }
 
@@ -92,5 +121,11 @@ public class Robot extends SampleRobot {
     }
     
     public void disabled() {
+    	j.setRumble(RumbleType.kLeftRumble, 0);
+		j.setRumble(RumbleType.kRightRumble, 0);
+    }
+    
+    public static DriveTrain getDriveTrain() {
+    	return dt;
     }
 }

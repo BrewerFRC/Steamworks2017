@@ -1,9 +1,6 @@
 package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-
-import org.usfirst.frc.team4564.robot.Thrower.ThrowerState;
-
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Talon;
@@ -14,20 +11,17 @@ public class Thrower {
 	private Spark flywheel;
 	private Talon feeder;
 	public Encoder encoder;
-	public static Xbox j = new Xbox(0);
-	private int lastCount;
 	private boolean spinning;
 	
 	//global variables for throwerState class
 	public ThrowerState state;
 	public int flywheelRPM = 3300; //Ideal RPM target for flywheel.
 	public double feederRate = .5;  //Ideal RPM for flywheel feeder.
-	public static long clearTimer = 0;
+	public long clearTimer = 0;
 	
 	public Thrower(double p, double i, double d) {
 		pid = new PID(p, i, d, true, "thrower");
-		pid.setMax(1.0);
-		pid.setMin(-1.0);
+		pid.setOutputLimits(-1, 1);
 		state = new ThrowerState(this);
 		flywheel = new Spark(Constants.PWM_FLYWHEEL);
 		feeder = new Talon(Constants.PWM_FEEDER_INTAKE);
@@ -62,7 +56,6 @@ public class Thrower {
 	public int getRPM() {
 		int rpm = (int)(encoder.getRate() * 60);
 		SmartDashboard.putNumber("rpm", rpm);
-		lastCount = encoder.get();
 		return rpm;
 	}
 	
@@ -81,7 +74,7 @@ public class Thrower {
 		feeder.set(input);
 	}
 	
-	public static class ThrowerState {
+	public class ThrowerState {
 		public static final int INIT  = 0; //Any initilazation steps
 		public static final int READY = 1;  //Ready to begin firing process
 		public static final int SPIN_UP = 2;  //Spin up flywheel to set RPM
@@ -91,11 +84,9 @@ public class Thrower {
 		
 		private Thrower thrower;
 		private int currentState;
-		private long verificationTimer;
 		
 		public ThrowerState(Thrower thrower) {
 			currentState = INIT;
-			verificationTimer = 0;
 			this.thrower = thrower;
 		}
 
