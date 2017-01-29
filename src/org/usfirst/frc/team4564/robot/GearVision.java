@@ -34,14 +34,14 @@ public class GearVision {
 
 	public void track() {
 		double turn = 0;
-		double slide = table.getNumber("slideRate", 0) / 1.5;
+		double slide = table.getNumber("slideRate", 0) / 3.0;
 		double distance = table.getNumber("distance", 0);
 		if (distance == 704) {
 			return;
 		}
 		int sign = (slide < 0) ? -1 : 1;
 		if(!(slide == 0)) {
-			slide = sign * (Math.abs(slide) + 0.30);
+			slide = sign * (Math.abs(slide) + 0.38);
 		}
 		turn = table.getNumber("rateTurn", 0)/50.0;
 		Common.dashNum("Vision Turn: ", turn);
@@ -52,9 +52,9 @@ public class GearVision {
 			reached = true;
 		}
 		if (reached) {
-			if((slide == 0 && (Math.abs(turn) <= 3)) || aligned){
+			if((slide == 0 ) || aligned){
 				aligned = true;
-				dt.setDrive(-.40 , -DriveTrain.getHeading().turnRate(), 0);
+				dt.setDrive(-.50 , -DriveTrain.getHeading().turnRate(), 0);
 			} else {
 				dt.setDrive(0, -DriveTrain.getHeading().turnRate(), -slide);
 				//dt.setDrive(0, -DriveTrain.getHeading().turnRate(), 0);
@@ -65,11 +65,10 @@ public class GearVision {
 			if(fwdpow > .58) {
 				fwdpow = .58;
 			}
-			dt.setDrive(-fwdpow, -DriveTrain.getHeading().turnRate(), -slide);
-			//dt.setDrive(0, -DriveTrain.getHeading().turnRate(), 0);
-			if(distance > 45) {
-		
-				//DriveTrain.getHeading().incrementTargetAngle(turn);
+				dt.setDrive(-fwdpow, -DriveTrain.getHeading().turnRate(), -slide);
+				//dt.setDrive(0, -DriveTrain.getHeading().turnRate(), 0);
+			if(distance > 60) {
+				DriveTrain.getHeading().incrementTargetAngle(turn);
 			}
 		}
 	}
