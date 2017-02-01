@@ -43,7 +43,7 @@ public class EncoderRate implements Runnable {
 	
 	public double getRate() {
 		while(!threadSafe) {
-			System.out.println("notSafe");
+			//System.out.println("notSafe");
 			int i = 1 + 1;
 		}
 		return this.rate;

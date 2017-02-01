@@ -1,7 +1,10 @@
 package org.usfirst.frc.team4564.robot;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 public class PID {
 	//Terms
+	private String name;
 	private double p;
 	private double i;
 	private double d;
@@ -22,11 +25,22 @@ public class PID {
 	private double lastCalc;
 	
 	public PID(double p, double i, double d, boolean forward, String name) {
+		this.name = name;
 		this.p = p;
 		this.i = i;
 		this.d = d;
 		this.forward = forward;
 		this.deltaTime = (long)(1.0/Constants.REFRESH_RATE*1000);
+		
+		SmartDashboard.putNumber(this.name + "P", this.p);
+		SmartDashboard.putNumber(this.name + "I", this.i);
+		SmartDashboard.putNumber(this.name + "D", this.d);
+	}
+	
+	public void update() {
+		this.p = SmartDashboard.getNumber(this.name + "P", this.p);
+		this.i = SmartDashboard.getNumber(this.name + "I", this.i);
+		this.d = SmartDashboard.getNumber(this.name + "D", this.d);
 	}
 	
 	public void setOutputLimits(double min, double max){
