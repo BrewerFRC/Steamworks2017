@@ -35,7 +35,7 @@ public class Thrower {
 		
 		rate = new EncoderRate(encoder);
 		rate.setSampleRate(1000);
-		new Thread(rate).start();
+		//new Thread(rate).start();
 	}
 	
 	public void setPIDOn(boolean on) {

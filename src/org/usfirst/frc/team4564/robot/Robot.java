@@ -120,8 +120,9 @@ public class Robot extends SampleRobot {
     		SmartDashboard.putNumber("samplesToAverage", thrower.encoder.getSamplesToAverage());
     	   thrower.state.update();
     	   thrower.update();
-    	   
-    	   Timer.delay(0.02);
+    	   double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
+    	   Timer.delay((delay > 0) ? delay : 0.001);
+
     	}
     }
 
