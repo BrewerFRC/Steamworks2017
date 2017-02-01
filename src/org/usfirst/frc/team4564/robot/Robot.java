@@ -61,29 +61,6 @@ public class Robot extends SampleRobot {
     			thrower.setPIDOn(false);
     			thrower.setFlywheelSpeed(flywheelSpeed);
     		}
-    		else {
-    			thrower.setPIDOn(true);
-    			int direction = 0;
-    			if (j.when("dPadUp")) {
-    				direction = 1;
-    			}
-    			else if (j.when("dPadDown")) {
-    				direction = -1;
-    			}
-    			PID pid = thrower.getPID();
-    			if (j.getYButton()) {
-        			pid.setP(pid.getP() + direction*0.000002);
-        			SmartDashboard.putNumber("pidP", pid.getP());
-        		}
-        		else if (j.getBButton()) {
-        			pid.setI(pid.getI() + direction*0.000002);
-        			SmartDashboard.putNumber("pidI", pid.getI());
-        		}
-        		else if (j.getAButton()) {
-        			pid.setD(pid.getD() + direction*0.001);
-        			SmartDashboard.putNumber("pidD", pid.getD());
-        		}
-    		}
     		
     		double forward = j.getY(GenericHID.Hand.kLeft);
     		double turn = j.getX(GenericHID.Hand.kLeft);

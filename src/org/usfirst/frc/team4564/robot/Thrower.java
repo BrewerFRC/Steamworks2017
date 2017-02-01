@@ -51,7 +51,7 @@ public class Thrower {
 	}
 	
 	public void update() {
-		//pid.update();
+		pid.update();
 		if (spinning) {
 			double speed = pid.calc(getRPM());
 			SmartDashboard.putNumber("pidCalc", speed);
