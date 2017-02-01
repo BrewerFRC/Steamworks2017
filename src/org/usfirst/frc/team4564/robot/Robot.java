@@ -47,7 +47,7 @@ public class Robot extends SampleRobot {
     				prevRightTrigger = true;
     			} else {
     				thrower.state.stopFiring();
-    				thrower.state.clearTimer = Common.time() + 500;
+//    				thrower.state.clearTimer = Common.time() + 500;
     				prevRightTrigger = false;
     			}
     		}
@@ -85,8 +85,8 @@ public class Robot extends SampleRobot {
         		}
     		}
     		
-    		double forward = j.getY(GenericHID.Hand.kLeft) / 1.5;
-    		double turn = j.getX(GenericHID.Hand.kLeft) / 1.5;
+    		double forward = j.getY(GenericHID.Hand.kLeft);
+    		double turn = j.getX(GenericHID.Hand.kLeft);
     		double slide = 0;
     		if (j.getPressed("leftTrigger")) {
     			slide = -j.getLeftTrigger();
@@ -121,7 +121,7 @@ public class Robot extends SampleRobot {
     	   thrower.state.update();
     	   thrower.update();
     	   
-    	   Timer.delay((1000/Constants.REFRESH_RATE - (Common.time() - time)) / 1000);
+    	   Timer.delay(0.02);
     	}
     }
 
