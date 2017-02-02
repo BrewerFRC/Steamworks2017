@@ -107,6 +107,7 @@ public class Heading {
 	
 	// This returns the turn power required to turn to target heading.  If heading hold is off, turn rate is always 0.
 	public double turnRate() {
+		pid.update();
 		if (headingHold) {
 			//Return the PID calculation of the shorter path.
 			return pid.calc(gyro.getAngle());
