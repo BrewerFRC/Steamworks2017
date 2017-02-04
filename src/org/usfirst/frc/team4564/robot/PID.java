@@ -38,6 +38,7 @@ public class PID {
 	}
 	
 	public void update() {
+		
 		this.p = SmartDashboard.getNumber(this.name + "P", this.p);
 		this.i = SmartDashboard.getNumber(this.name + "I", this.i);
 		this.d = SmartDashboard.getNumber(this.name + "D", this.d);
@@ -91,11 +92,13 @@ public class PID {
 		
 		//Derivative calculation
 		double derivative = (error - previousError) / deltaTime;
+		Common.dashNum(this.name + "Derivative", derivative);
+		Common.dashNum(this.name + "internalD", d);
 		previousError = error;
 		
 		//Calculate output
 		double output = p*error + i*sumError + d*derivative;
-		if(output>0) 
+		if(output > 0) 
 			sign = 1;
 		output = Math.abs(output)+ min;
 		output *= sign;
