@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.ctre.CANTalon;
 
 public class Robot extends SampleRobot {
 	private static Robot instance;
@@ -12,23 +13,25 @@ public class Robot extends SampleRobot {
 	private static DriveTrain dt;
 	private static Thrower thrower;
 	private static GearVision gearVision;
-	
+	private static Constants Constants;
 	private Xbox j ;
 	public static NetworkTable table;
-	
 	private boolean prevRightTrigger;
+	CANTalon talon = new CANTalon(1);
 	
     public Robot() {
     	instance = this;
     	dt = new DriveTrain();
+    	Constants = new Constants();
     	thrower = new Thrower(0.000012, 0, 0.008);
     	gearVision = new GearVision();
     	j = new Xbox(0);
     	prevRightTrigger = false;
+    	dt.init();
     }
     
     public void robotInit() {
-
+    	
     }
 
     public void autonomous() {
@@ -41,6 +44,8 @@ public class Robot extends SampleRobot {
 	    double flywheelSpeed = -0.85;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
+    		double PIDTurn = dt.getHeading().turnRate();
+    		//talon.set(.3);
     		if(j.when("rightTrigger")) {
     			if(prevRightTrigger == false) {
     				thrower.state.fire();
@@ -88,8 +93,9 @@ public class Robot extends SampleRobot {
     		}
     		else {
     			gearVision.reset();
-    			dt.setDrive(forward, turn, slide);
+    			dt.setDrive(forward, turn + (Constants.OFFSET), slide);
     		}
+
     		if (j.when("y")) {
     			DriveTrain.getHeading().setHeadingHold(true);
     		}
@@ -106,6 +112,23 @@ public class Robot extends SampleRobot {
     		else if (j.when("dPadRight")) {
     			DriveTrain.getHeading().relTurn(10);
     		}
+
+
+    		//End of Xbox tests
+    	//	SmartDashboard.putNumber("encoder", thrower.encoder.get());
+    	//	SmartDashboard.putNumber("rpm", thrower.getRPM());
+    	//	SmartDashboard.putNumber("samplesToAverage", thrower.encoder.getSamplesToAverage());
+    	//	SmartDashboard.putNumber("Encoder Value", talon.getEncPosition());
+    	//	SmartDashboard.putNumber("Encoder Rate", (talon.getEncVelocity()));
+    		SmartDashboard.putNumber("Forward", forward);
+    		SmartDashboard.putNumber("Slide", slide);
+    		SmartDashboard.putNumber("Turn", turn);
+    		SmartDashboard.putNumber("Angle", dt.getHeading().getAngle());
+    		SmartDashboard.putNumber("Tangle", dt.getHeading().getTargetAngle());
+    		SmartDashboard.putNumber("TurnCalc", PIDTurn);
+    		SmartDashboard.putNumber("CamDistance", GearVision.i.distance());
+    		SmartDashboard.putNumber("CamSlide", GearVision.i.slide());
+    		SmartDashboard.putNumber("CamTurn", GearVision.i.turn());
     		
     	   thrower.state.update();
     	   thrower.update();
@@ -125,6 +148,7 @@ public class Robot extends SampleRobot {
     public void disabled() {
     	j.setRumble(RumbleType.kLeftRumble, 0);
 		j.setRumble(RumbleType.kRightRumble, 0);
+		talon.setPosition(0);
     }
     
     public static DriveTrain getDriveTrain() {

@@ -18,4 +18,10 @@ public class Constants {
 	
 	public static final int FLYWHEEL_COUNTS_PER_ROT = 1024;
 	public static final int FLYWHEEL_RPM_ALLOWED_ERROR = 1000;
+	
+	public static final double OFFSET = 0.2135018859803;
+	public static final double SLIDE_MIN = .33;
+	public static final double SLIDE_MAX = 1;
+	public static final double FORWARD_MIN = .39;
+	public static final double TURN_MIN = 0;
 }
