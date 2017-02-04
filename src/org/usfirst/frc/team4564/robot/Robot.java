@@ -44,7 +44,7 @@ public class Robot extends SampleRobot {
 	    double flywheelSpeed = -0.85;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		double PIDTurn = dt.getHeading().turnRate();
+    		double PIDTurn = DriveTrain.getHeading().turnRate();
     		//talon.set(.3);
     		if(j.when("rightTrigger")) {
     			if(prevRightTrigger == false) {
@@ -123,8 +123,8 @@ public class Robot extends SampleRobot {
     		SmartDashboard.putNumber("Forward", forward);
     		SmartDashboard.putNumber("Slide", slide);
     		SmartDashboard.putNumber("Turn", turn);
-    		SmartDashboard.putNumber("Angle", dt.getHeading().getAngle());
-    		SmartDashboard.putNumber("Tangle", dt.getHeading().getTargetAngle());
+    		SmartDashboard.putNumber("Angle", DriveTrain.getHeading().getAngle());
+    		SmartDashboard.putNumber("Tangle", DriveTrain.getHeading().getTargetAngle());
     		SmartDashboard.putNumber("TurnCalc", PIDTurn);
     		SmartDashboard.putNumber("CamDistance", GearVision.i.distance());
     		SmartDashboard.putNumber("CamSlide", GearVision.i.slide());
