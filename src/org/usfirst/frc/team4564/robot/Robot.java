@@ -14,17 +14,16 @@ public class Robot extends SampleRobot {
 	private static DriveTrain dt;
 	private static Thrower thrower;
 	private static GearVision gearVision;
-	
+	private static Constants Constants;
 	private Xbox j ;
 	public static NetworkTable table;
-	
 	private boolean prevRightTrigger;
-	
 	CANTalon talon = new CANTalon(1);
 	
     public Robot() {
     	instance = this;
     	dt = new DriveTrain();
+    	Constants = new Constants();
     	thrower = new Thrower(0.000012, 0, 0.008);
     	gearVision = new GearVision();
     	j = new Xbox(0);
@@ -46,7 +45,8 @@ public class Robot extends SampleRobot {
 	    double flywheelSpeed = -0.85;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		talon.set(.3);
+    		double PIDTurn = dt.getHeading().turnRate();
+    		//talon.set(.3);
     		if(j.when("rightTrigger")) {
     			if(prevRightTrigger == false) {
     				thrower.state.fire();
@@ -94,15 +94,25 @@ public class Robot extends SampleRobot {
     		}
     		else {
     			gearVision.reset();
-    			dt.setDrive(forward, turn, slide);
+    			dt.setDrive(forward, turn + (Constants.OFFSET), slide);
     		}
 
     		//End of Xbox tests
-    		SmartDashboard.putNumber("encoder", thrower.encoder.get());
-    		SmartDashboard.putNumber("rpm", thrower.getRPM());
-    		SmartDashboard.putNumber("samplesToAverage", thrower.encoder.getSamplesToAverage());
-    		SmartDashboard.putNumber("Encoder Value", talon.getEncPosition());
-    		SmartDashboard.putNumber("Encoder Rate", (talon.getEncVelocity()));
+    	//	SmartDashboard.putNumber("encoder", thrower.encoder.get());
+    	//	SmartDashboard.putNumber("rpm", thrower.getRPM());
+    	//	SmartDashboard.putNumber("samplesToAverage", thrower.encoder.getSamplesToAverage());
+    	//	SmartDashboard.putNumber("Encoder Value", talon.getEncPosition());
+    	//	SmartDashboard.putNumber("Encoder Rate", (talon.getEncVelocity()));
+    		SmartDashboard.putNumber("Forward", forward);
+    		SmartDashboard.putNumber("Slide", slide);
+    		SmartDashboard.putNumber("Turn", turn);
+    		SmartDashboard.putNumber("Angle", dt.getHeading().getAngle());
+    		SmartDashboard.putNumber("Tangle", dt.getHeading().getTargetAngle());
+    		SmartDashboard.putNumber("TurnCalc", PIDTurn);
+    		SmartDashboard.putNumber("CamDistance", GearVision.i.distance());
+    		SmartDashboard.putNumber("CamSlide", GearVision.i.slide());
+    		SmartDashboard.putNumber("CamTurn", GearVision.i.turn());
+    		
     	   thrower.state.update();
     	   thrower.update();
     	   double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;

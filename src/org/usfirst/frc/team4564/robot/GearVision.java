@@ -3,6 +3,7 @@ package org.usfirst.frc.team4564.robot;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class GearVision {
+	public static GearVision i;
 	public static final int MIN_ALIGN_DISTANCE = 35;
 	public static final int MAX_ALIGN_DISTANCE = 150;
 	
@@ -13,6 +14,7 @@ public class GearVision {
 	private boolean aligned;
 	
 	public GearVision() {
+		i = this;
 		table = NetworkTable.getTable("visionTracking");
 		dt = Robot.getDriveTrain();
 	}
@@ -34,8 +36,8 @@ public class GearVision {
 
 	public void track() {
 		double turn = 0;
-		double slide = table.getNumber("slideRate", 0) / 3.0;
-		double distance = table.getNumber("distance", 0);
+		double slide = slide() / 3.0;
+		double distance = distance();
 		if (distance == 704) {
 			return;
 		}
@@ -43,7 +45,7 @@ public class GearVision {
 		if(!(slide == 0)) {
 			slide = sign * (Math.abs(slide) + 0.38);
 		}
-		turn = table.getNumber("rateTurn", 0);
+		turn = turn();
 		
 		if (distance < 70) {
 			turn /= -4.504*Math.log(distance) - 18.3;
@@ -78,5 +80,17 @@ public class GearVision {
 				DriveTrain.getHeading().incrementTargetAngle(turn);
 			}
 		}
+	}
+	
+	public double distance() {
+		return table.getNumber("distance", 704);
+	}
+	
+	public double slide() {
+		return table.getNumber("slideRate", 704);
+	}
+	
+	public double turn() {
+		return table.getNumber("rateTurn", 704);
 	}
 }
