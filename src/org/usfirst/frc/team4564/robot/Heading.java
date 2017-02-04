@@ -3,9 +3,9 @@ package org.usfirst.frc.team4564.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 
 public class Heading {
-	public static final double P = 0.15;
-	public static final double I = 0.00;
-	public static final double D = 0.1;
+	public static final double P = 0.185;
+	public static final double I = 0.00005;
+	public static final double D = 250.0;
 	
 	private ADXRS450_Gyro gyro;
 	//PID takes cumulative angles
@@ -18,7 +18,7 @@ public class Heading {
 		pid.setTarget(0.0);
 		pid.setMin(0.0);
 		pid.setOutputLimits(-1, 1);
-		gyro = new ADXRS450_Gyro();
+		gyro = new ADXRS450_Gyro();	
 	}
 	
 	//Resets PID and gyro
@@ -89,12 +89,14 @@ public class Heading {
 	// Activates or deactivates heading hold.  If setting heading hold, it will reset the PID and and set target heading to current heading
 	public void setHeadingHold(boolean headingHold) {
 		if (headingHold) {
+			Common.debug("headingHold True");
 			resetPID();
 			this.headingHold = true;
 			//Set target angle to current heading.
 			setHeading(getHeading());
 		}
 		else {
+			Common.debug("headingHold False");
 			resetPID();
 			this.headingHold = false;
 		}
@@ -109,10 +111,13 @@ public class Heading {
 	public double turnRate() {
 		pid.update();
 		if (headingHold) {
+			double turnRate = pid.calc(gyro.getAngle());
 			//Return the PID calculation of the shorter path.
-			return pid.calc(gyro.getAngle());
+			Common.dashNum("internalTurnRate", turnRate);
+			return turnRate;
 		}
 		else {
+			Common.debug("No Calc");
 			return 0.0;
 		}
 	}

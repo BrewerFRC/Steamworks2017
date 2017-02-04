@@ -35,12 +35,20 @@ public class Robot extends SampleRobot {
     }
 
     public void autonomous() {
-    	
+    	while (isEnabled() && isAutonomous()) {
+    		long time = Common.time();
+    		
+    		
+    		
+    		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
+     	    Timer.delay((delay > 0) ? delay : 0.001);
+    	}
     }
     
     public void operatorControl() {
     	long time;
 	    thrower.setPIDOn(true);
+	    DriveTrain.getHeading().reset(); 
 	    double flywheelSpeed = -0.85;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
@@ -85,6 +93,7 @@ public class Robot extends SampleRobot {
     			j.setRumble(RumbleType.kLeftRumble, 0);
     			j.setRumble(RumbleType.kRightRumble, 0);
     		}
+    		
     		if (j.when("a")) {
     			gearVision.start();
     		}
@@ -96,22 +105,7 @@ public class Robot extends SampleRobot {
     			dt.setDrive(forward, turn + (Constants.OFFSET), slide);
     		}
 
-    		if (j.when("y")) {
-    			DriveTrain.getHeading().setHeadingHold(true);
-    		}
-    		if (j.getPressed("y")) {
-    			dt.setDrive(0, DriveTrain.getHeading().turnRate(), 0);
-    		}
-    		else {
-    			DriveTrain.getHeading().setHeadingHold(false);
-    		}
     		
-    		if (j.when("dPadLeft")) {
-    			DriveTrain.getHeading().relTurn(-10);
-    		}
-    		else if (j.when("dPadRight")) {
-    			DriveTrain.getHeading().relTurn(10);
-    		}
 
 
     		//End of Xbox tests
@@ -142,7 +136,33 @@ public class Robot extends SampleRobot {
     }
 
     public void test() {
-    	
+    	while (isEnabled()) {
+    		long time = Common.time();
+    		
+    		double forward = j.getY(GenericHID.Hand.kLeft);
+    		double turn = j.getX(GenericHID.Hand.kLeft);
+    		double slide = 0;
+        	if (j.when("y")) {
+    			DriveTrain.getHeading().setHeadingHold(true);
+    		}
+    		if (j.getPressed("y")) {
+    			dt.setDrive(0, -DriveTrain.getHeading().turnRate(), 0);
+    		}
+    		else {
+    			DriveTrain.getHeading().setHeadingHold(false);
+    			dt.setDrive(forward, turn, slide);
+    		}
+    		
+    		if (j.when("dPadLeft")) {
+    			DriveTrain.getHeading().relTurn(-10);
+    		}
+    		else if (j.when("dPadRight")) {
+    			DriveTrain.getHeading().relTurn(10);
+    		}
+    		
+    		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
+     	    Timer.delay((delay > 0) ? delay : 0.001);
+    	}
     }
     
     public void disabled() {
