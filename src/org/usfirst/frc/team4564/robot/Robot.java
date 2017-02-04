@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4564.robot;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -90,13 +90,28 @@ public class Robot extends SampleRobot {
     			gearVision.reset();
     			dt.setDrive(forward, turn, slide);
     		}
+    		if (j.when("y")) {
+    			DriveTrain.getHeading().setHeadingHold(true);
+    		}
+    		if (j.getPressed("y")) {
+    			dt.setDrive(0, DriveTrain.getHeading().turnRate(), 0);
+    		}
+    		else {
+    			DriveTrain.getHeading().setHeadingHold(false);
+    		}
     		
-    		//End of Xbox tests
-    		SmartDashboard.putNumber("encoder", thrower.encoder.get());
-    		SmartDashboard.putNumber("rpm", thrower.getRPM());
-    		SmartDashboard.putNumber("samplesToAverage", thrower.encoder.getSamplesToAverage());
+    		if (j.when("dPadLeft")) {
+    			DriveTrain.getHeading().relTurn(-10);
+    		}
+    		else if (j.when("dPadRight")) {
+    			DriveTrain.getHeading().relTurn(10);
+    		}
+    		
     	   thrower.state.update();
     	   thrower.update();
+    	   
+    	   
+    	   
     	   double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     	   Timer.delay((delay > 0) ? delay : 0.001);
 
@@ -118,5 +133,9 @@ public class Robot extends SampleRobot {
     
     public static Robot getInstance() {
     	return instance;
+    }
+    
+    public void dashOutput() {
+    	
     }
 }
