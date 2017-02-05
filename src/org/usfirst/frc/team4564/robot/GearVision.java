@@ -2,13 +2,20 @@ package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
+/**
+ * The Gear Vision autonomous subsystem.
+ * Auto-aligns a robot to the airship gear peg for FIRST Steamworks.
+ * 
+ * @author Brewer FIRST Robotics Team 4564
+ * @author Evan McCoy
+ * @author Wataru Nakata
+ */
 public class GearVision {
 	public static GearVision i;
 	public static final int MIN_ALIGN_DISTANCE = 35;
 	public static final int MAX_ALIGN_DISTANCE = 150;
 	
 	private NetworkTable table;
-	private DriveTrain dt;
 	
 	private boolean reached;
 	private boolean aligned;
@@ -20,7 +27,6 @@ public class GearVision {
 	public GearVision() {
 		i = this;
 		table = NetworkTable.getTable("visionTracking");
-		dt = Robot.getDriveTrain();
 	}
 	
 	public boolean checkReady() {
@@ -29,6 +35,7 @@ public class GearVision {
 	}
 	
 	public void start() {
+		reset();
 		DriveTrain.getHeading().setHeadingHold(true);
 	}
 	

@@ -1,9 +1,18 @@
 package org.usfirst.frc.team4564.robot;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
+/**
+ * The driver class for the FIRST Steamworks 2017 robot challenge.
+ * 
+ * @author Brewer FIRST Robotics Team 4564
+ * @author Evan McCoy
+ * @author Jacob Cote
+ * @author Wataru Nakata
+ */
 public class Robot extends SampleRobot {
 	private static Robot instance;
 
@@ -63,29 +72,34 @@ public class Robot extends SampleRobot {
     			j.setRumble(RumbleType.kRightRumble, 0);
     		}
     		
+    		//Robot movement control.
     		double forward = 0;
     		double turn = 0;
     		double slide = 0;
-    		if (j.getPressed("leftTrigger")) {
-    			slide = -j.getLeftTrigger();
-    		}
-    		else if (j.getPressed("rightTrigger")) {
-    			slide = j.getRightTrigger();
-    		}
-    		
-    		if (j.when("a")) {
-    			gearVision.start();
-    		}
     		if (j.getPressed("a")) {
+    			if (j.when("a")) {
+    				gearVision.start();
+    			}
     			gearVision.track();
+    			forward = gearVision.forward();
+    			turn = gearVision.turn();
+    			slide = gearVision.slide();
     		}
     		else {
-    			gearVision.reset();
-    			dt.setDrive(forward, turn + (Constants.OFFSET), slide);
+    			forward = j.getY(GenericHID.Hand.kLeft);
+    			turn  = j.getX(GenericHID.Hand.kRight);
+    			if (j.getPressed("leftTrigger")) {
+        			slide = -j.getLeftTrigger();
+        		}
+        		else if (j.getPressed("rightTrigger")) {
+        			slide = j.getRightTrigger();
+        		}
     		}
     		
+    		dt.setDrive(forward, turn, slide);
+    		
+    		//Update subsystems.
     		thrower.state.update();
-    		thrower.update();
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);

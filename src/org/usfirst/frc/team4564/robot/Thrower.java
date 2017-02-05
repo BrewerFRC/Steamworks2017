@@ -96,6 +96,9 @@ public class Thrower {
 			this.thrower = thrower;
 		}
 
+		/**
+		 * Sets the thrower to firing state if prepared, otherwise the thrower continues to spin up.
+		 */
 		public void fire() {
 			Common.debug("Fire Order Issued: Checking flywheel is ready.");
 			if(currentState == READY_TO_FIRE) {
@@ -107,21 +110,32 @@ public class Thrower {
 			}
 		}
 		
+		/**
+		 * Sets the thrower to spin up state.
+		 */
 		public void spinUp() {
 			currentState = SPIN_UP;
 		}
 		
+		/**
+		 * Sets the shooter to clearing state to remove balls and stop the flywheel.
+		 */
 		public void stopFiring() {
 			currentState = CLEAR_SHOOTER;
 		}
 		
+		/**
+		 * Updates the thrower through state progression.
+		 * 
+		 * @return int the current state of the thrower.
+		 */
 		public int update() {
 			switch(currentState) {
 				case READY:
 					Common.debug("READY: Ready to begin firing process");
 					break;
 				case SPIN_UP:
-				Common.debug("SPIN_UP: Spinning up flywheel");
+					Common.debug("SPIN_UP: Spinning up flywheel");
 					thrower.setSpeed(thrower.flywheelRPM);
 					if(thrower.ready()) {
 						currentState = READY_TO_FIRE;

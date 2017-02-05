@@ -6,18 +6,33 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 
+/**
+ * Represents an Xbox controller interface.
+ * 
+ * @author Brewer FIRST Robotics Team 4564
+ * @author Evan McCoy
+ * @author Jacob Cote
+ */
 public class Xbox extends XboxController{
-	
 	private Map<String, Supplier<Boolean>> functionMap = new HashMap<String, Supplier<Boolean>>();
 	private Map<String, Boolean> whenMap = new HashMap<String, Boolean>();
 	
+	/**
+	 * Instantiates the controller on the specified port.
+	 * 
+	 * @param port the port of the controller.
+	 */
 	public Xbox(int port) {
 		super(port);
 		setupFunctions();
-		
 	}
 	
-	//Deadzone
+	/**
+	 * The universal deadzone for the controller.
+	 * 
+	 * @param input the value of the interface in use.
+	 * @return double the input value with deadzone applied.
+	 */
 	public double deadzone(double input) {
 		if (Math.abs(input) < .2) {
 			return(0);
@@ -26,37 +41,30 @@ public class Xbox extends XboxController{
 		}
 	}
 	
-	/*
-	//Prev Function
-	public void prev(Function()) {
-		return (prev + input);
-	}
-	
-	//Rising edge function
-	public boolean when(Function) {
-		if(FunctionValue()) {
-			if(prev(Function())) {
-				return false;
-			} else {
-				prev(Function()) = true;
-				return true;
-			}
-		} else {
-			prev(Function()) = false;
-			return false;
-		}
-	}
-	*/
-	
-	//Triggers
+	/**
+	 * Gets the value of the right trigger with deadzone.
+	 * 
+	 * @return double the value of the right trigger from the deadzone to 1.0.
+	 */
 	public double getRightTrigger() {
 		return deadzone(getTriggerAxis(GenericHID.Hand.kRight));
 	}
 	
+	/**
+	 * Gets the value of the left trigger with deadzone.
+	 * 
+	 * @return double the value of the left trigger from the deadzone to 1.0.
+	 */
 	public double getLeftTrigger() {
 		return deadzone(getTriggerAxis(GenericHID.Hand.kLeft));
 	}
 	
+	/**
+	 * Returns whether or not the specified button is pressed.
+	 * 
+	 * @param button the button to check.
+	 * @return boolean whether or not the button is pressed.
+	 */
 	public boolean getPressed(String button) {
 		if (functionMap.containsKey(button)) {
 			return functionMap.get(button).get();
@@ -64,6 +72,12 @@ public class Xbox extends XboxController{
 		return false;
 	}
 	
+	/**
+	 * Returns the rising edge of a button press.
+	 * 
+	 * @param button the button to check rising edge for.
+	 * @return boolean whether or not a rising edge was detected.
+	 */
 	public boolean when(String button) {
 		//TODO: Debounce buttons
 		if (!whenMap.containsKey(button)) {
@@ -82,6 +96,9 @@ public class Xbox extends XboxController{
 		return false;
 	}
 	
+	/**
+	 * Maps superclass button functions to strings and sets up built-in deadzones.
+	 */
 	public void setupFunctions() {
 		functionMap.put("a", this::getAButton);
 		whenMap.put("a", false);
