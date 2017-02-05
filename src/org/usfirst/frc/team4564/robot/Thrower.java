@@ -1,6 +1,9 @@
 package org.usfirst.frc.team4564.robot;
 
-import edu.wpi.first.wpilibj.Spark;
+import com.ctre.CANTalon;
+import com.ctre.CANTalon.FeedbackDevice;
+import com.ctre.CANTalon.TalonControlMode;
+
 import edu.wpi.first.wpilibj.Talon;
 
 /**
@@ -11,7 +14,7 @@ import edu.wpi.first.wpilibj.Talon;
  * @author Jacob Cote
  */
 public class Thrower {
-	private Spark flywheel;
+	private CANTalon flywheel;
 	private Talon feeder;
 	public static Xbox j = new Xbox(0);
 	
@@ -30,9 +33,24 @@ public class Thrower {
 		state = new ThrowerState(this);
 		
 		//Instantiate motor controllers.
-		flywheel = new Spark(Constants.PWM_FLYWHEEL);
+		flywheel = new CANTalon(Constants.CANID_FLYWHEEL);
 		feeder = new Talon(Constants.PWM_FEEDER_INTAKE);
-		flywheel.setInverted(true);
+		
+		flywheel.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+		flywheel.reverseSensor(false);
+		flywheel.configEncoderCodesPerRev(Constants.FLYWHEEL_COUNTS_PER_ROT);
+		flywheel.configNominalOutputVoltage(+0.0f, -0.0f);
+		flywheel.configPeakOutputVoltage(+12.0f, -12.0f);
+		
+		//Set pid controller in talon SRX
+		flywheel.setProfile(0);
+		flywheel.setF(0);
+		flywheel.setP(p);
+		flywheel.setI(i);
+		flywheel.setD(d);
+		
+		flywheel.changeControlMode(TalonControlMode.Speed);
+		
 	}
 	
 	/**
@@ -42,7 +60,7 @@ public class Thrower {
 	 */
 	public double getRPM() {
 		//int rpm = (int)(encoder.getRate() * 60);
-		return 0/*rpm*/;
+		return flywheel.getEncVelocity()/10240.0*1500;
 	}
 	
 	/**
@@ -51,7 +69,7 @@ public class Thrower {
 	 * @return boolean whether or not the thrower is ready.
 	 */
 	public boolean ready() {
-		return Math.abs(/*target*/ - getRPM()) < Constants.FLYWHEEL_RPM_ALLOWED_ERROR;
+		return Math.abs(flywheel.getClosedLoopError()/10240.0*1500) < Constants.FLYWHEEL_RPM_ALLOWED_ERROR;
 	}
 	
 	/**
@@ -60,7 +78,7 @@ public class Thrower {
 	 * @param rpm the speed in rotations per minute.
 	 */
 	public void setSpeed(int rpm) {
-		//pid.setTarget(rpm);
+		flywheel.set(rpm);
 	}
 	
 	/**
