@@ -11,6 +11,8 @@ public class Constants {
 	public static final int PWM_DRIVE_SL = 4;
 	public static final int PWM_DRIVE_SR = 5;
 	
+	public static final int CANID_FLYWHEEL = 0;
+	
 	public static final int DIO_FLYWHEEL_ENCODER_A = 5;
 	public static final int DIO_FLYWHEEL_ENCODER_B = 6;
 	
