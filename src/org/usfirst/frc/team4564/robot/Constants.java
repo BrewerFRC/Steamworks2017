@@ -1,8 +1,14 @@
 package org.usfirst.frc.team4564.robot;
 
+/**
+ * Constants for the 2017 competition robot.
+ * 
+ * @author Brewer FIRST Robotics Team 4564
+ * @author Evan McCoy
+ * @author Jacob Cote
+ * @author Wataru Nakata
+ */
 public class Constants {
-	
-	public static final int PWM_FLYWHEEL = 7;
 	public static final int PWM_FEEDER_INTAKE = 8;
 	public static final int PWM_DRIVE_FR = 2;
 	public static final int PWM_DRIVE_BR = 3;
@@ -12,9 +18,6 @@ public class Constants {
 	public static final int PWM_DRIVE_SR = 5;
 	
 	public static final int CANID_FLYWHEEL = 0;
-	
-	public static final int DIO_FLYWHEEL_ENCODER_A = 5;
-	public static final int DIO_FLYWHEEL_ENCODER_B = 6;
 	
 	public static final int REFRESH_RATE = 50;
 	
