@@ -1,11 +1,8 @@
 package org.usfirst.frc.team4564.robot;
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import com.ctre.CANTalon;
 
 public class Robot extends SampleRobot {
 	private static Robot instance;
@@ -13,27 +10,30 @@ public class Robot extends SampleRobot {
 	private static DriveTrain dt;
 	private static Thrower thrower;
 	private static GearVision gearVision;
-	private static Constants Constants;
 	private Xbox j ;
 	public static NetworkTable table;
-	private boolean prevRightTrigger;
-	CANTalon talon = new CANTalon(1);
 	
+	/**
+	 * Instantiates all subsystems.
+	 */
     public Robot() {
     	instance = this;
     	dt = new DriveTrain();
-    	Constants = new Constants();
     	thrower = new Thrower(0.000012, 0, 0.008);
     	gearVision = new GearVision();
     	j = new Xbox(0);
-    	prevRightTrigger = false;
-    	dt.init();
     }
     
+    /**
+     * Initializes all subsystems.
+     */
     public void robotInit() {
-    	
+    	dt.init();
     }
 
+    /**
+     * Robot autonomous mode.
+     */
     public void autonomous() {
     	while (isEnabled() && isAutonomous()) {
     		long time = Common.time();
@@ -45,46 +45,15 @@ public class Robot extends SampleRobot {
     	}
     }
     
+    /**
+     * Robot teleoperated mode.
+     */
     public void operatorControl() {
     	long time;
-	    thrower.setPIDOn(true);
-	    DriveTrain.getHeading().reset(); 
-	    double flywheelSpeed = -0.85;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		double PIDTurn = DriveTrain.getHeading().turnRate();
-    		//talon.set(.3);
-    		if(j.when("rightTrigger")) {
-    			if(prevRightTrigger == false) {
-    				thrower.state.fire();
-    				prevRightTrigger = true;
-    			} else {
-    				thrower.state.stopFiring();
-//    				thrower.state.clearTimer = Common.time() + 500;
-    				prevRightTrigger = false;
-    			}
-    		}
-    		if (j.getPressed("rightBumper")) {
-    			thrower.setSpeed(3300);
-    		}
-    		else {
-    			thrower.setSpeed(0);
-    		}
-    		if (j.getXButton()) {
-    			thrower.setPIDOn(false);
-    			thrower.setFlywheelSpeed(flywheelSpeed);
-    		}
     		
-    		double forward = j.getY(GenericHID.Hand.kLeft);
-    		double turn = j.getX(GenericHID.Hand.kLeft);
-    		double slide = 0;
-    		if (j.getPressed("leftTrigger")) {
-    			slide = -j.getLeftTrigger();
-    		}
-    		else if (j.getPressed("rightTrigger")) {
-    			slide = j.getRightTrigger();
-    		}
-    		
+    		//Inform drivers if gear vision is ready to activate.
     		if (gearVision.checkReady()) {
     			j.setRumble(RumbleType.kLeftRumble, 0.3);
     			j.setRumble(RumbleType.kRightRumble, 0.3);
@@ -92,6 +61,16 @@ public class Robot extends SampleRobot {
     		else if (!j.getPressed("a")) {
     			j.setRumble(RumbleType.kLeftRumble, 0);
     			j.setRumble(RumbleType.kRightRumble, 0);
+    		}
+    		
+    		double forward = 0;
+    		double turn = 0;
+    		double slide = 0;
+    		if (j.getPressed("leftTrigger")) {
+    			slide = -j.getLeftTrigger();
+    		}
+    		else if (j.getPressed("rightTrigger")) {
+    			slide = j.getRightTrigger();
     		}
     		
     		if (j.when("a")) {
@@ -104,81 +83,44 @@ public class Robot extends SampleRobot {
     			gearVision.reset();
     			dt.setDrive(forward, turn + (Constants.OFFSET), slide);
     		}
-
     		
-
-
-    		//End of Xbox tests
-    	//	SmartDashboard.putNumber("encoder", thrower.encoder.get());
-    	//	SmartDashboard.putNumber("rpm", thrower.getRPM());
-    	//	SmartDashboard.putNumber("samplesToAverage", thrower.encoder.getSamplesToAverage());
-    	//	SmartDashboard.putNumber("Encoder Value", talon.getEncPosition());
-    	//	SmartDashboard.putNumber("Encoder Rate", (talon.getEncVelocity()));
-    		SmartDashboard.putNumber("Forward", forward);
-    		SmartDashboard.putNumber("Slide", slide);
-    		SmartDashboard.putNumber("Turn", turn);
-    		SmartDashboard.putNumber("Angle", DriveTrain.getHeading().getAngle());
-    		SmartDashboard.putNumber("Tangle", DriveTrain.getHeading().getTargetAngle());
-    		SmartDashboard.putNumber("TurnCalc", PIDTurn);
-    		SmartDashboard.putNumber("CamDistance", GearVision.i.distance());
-    		SmartDashboard.putNumber("CamSlide", GearVision.i.slide());
-    		SmartDashboard.putNumber("CamTurn", GearVision.i.turn());
-    		
-    	   thrower.state.update();
-    	   thrower.update();
-    	   
-    	   
-    	   
-    	   double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
-    	   Timer.delay((delay > 0) ? delay : 0.001);
-
-    	}
-    }
-
-    public void test() {
-    	while (isEnabled()) {
-    		long time = Common.time();
-    		
-    		double forward = j.getY(GenericHID.Hand.kLeft);
-    		double turn = j.getX(GenericHID.Hand.kLeft);
-    		double slide = 0;
-        	if (j.when("y")) {
-    			DriveTrain.getHeading().setHeadingHold(true);
-    		}
-    		if (j.getPressed("y")) {
-    			dt.setDrive(0, -DriveTrain.getHeading().turnRate(), 0);
-    		}
-    		else {
-    			DriveTrain.getHeading().setHeadingHold(false);
-    			dt.setDrive(forward, turn, slide);
-    		}
-    		
-    		if (j.when("dPadLeft")) {
-    			DriveTrain.getHeading().relTurn(-10);
-    		}
-    		else if (j.when("dPadRight")) {
-    			DriveTrain.getHeading().relTurn(10);
-    		}
+    		thrower.state.update();
+    		thrower.update();
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
-     	    Timer.delay((delay > 0) ? delay : 0.001);
+    		Timer.delay((delay > 0) ? delay : 0.001);
     	}
     }
     
+    /**
+     * Executes when the robot is disabled.
+     */
     public void disabled() {
     	j.setRumble(RumbleType.kLeftRumble, 0);
 		j.setRumble(RumbleType.kRightRumble, 0);
-		talon.setPosition(0);
     }
     
+    /**
+     * An instance of the robot DriveTrain.
+     * 
+     * @return DriveTrain an instance of DriveTrain.
+     */
     public static DriveTrain getDriveTrain() {
     	return dt;
     }
     
+    /**
+     * An instance of the main Robot class.
+     * 
+     * @return Robot the main instance of Robot.
+     */
     public static Robot getInstance() {
     	return instance;
     }
     
+    /**
+     * Post debug outputs to SmartDashboard.
+     */
     public void dashOutput() {
     	
     }

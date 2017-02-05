@@ -13,6 +13,10 @@ public class GearVision {
 	private boolean reached;
 	private boolean aligned;
 	
+	private double forward;
+	private double turn;
+	private double slide;
+	
 	public GearVision() {
 		i = this;
 		table = NetworkTable.getTable("visionTracking");
@@ -32,65 +36,114 @@ public class GearVision {
 		DriveTrain.getHeading().setHeadingHold(false);
 		reached = false;
 		aligned = false;
+		turn = 0;
+		slide = 0;
+		forward = 0;
 	}
 
+	/**
+	 * Calculates drive train motor values to align to the gear peg.
+	 */
 	public void track() {
-		double turn = 0;
-		double slide = slide() / 3.0;
-		double distance = distance();
-		if (distance == 704) {
-			return;
-		}
-		int sign = (slide < 0) ? -1 : 1;
-		if(!(slide == 0)) {
-			slide = sign * (Math.abs(slide) + 0.49);
-		}
-		turn = turn();
+		double distance = rawDistance();
 		
+		//Slide calculation
+		double rawSlide = rawSlide() / 3.0;
+		int sign = (rawSlide < 0) ? -1 : 1;
+		if(!(rawSlide == 0)) {
+			rawSlide = sign * (Math.abs(rawSlide) + 0.49);
+		}
+		
+		//Turn calculation
+		double rawTurn = rawTurn();
 		if (distance < 70) {
-			turn /= -4.504*Math.log(distance) - 18.3;
+			rawTurn /= -4.504*Math.log(distance) - 18.3;
 		}
+		rawTurn /= 40.0;
 		
-		turn /= 40.0;
-		
-		Common.dashNum("Vision Turn: ", turn);
-		Common.dashNum("Turn Rate:", -DriveTrain.getHeading().turnRate());
-		Common.dashNum("Target: ", DriveTrain.getHeading().getTargetAngle());
-		Common.dashNum("Angle", DriveTrain.getHeading().getAngle());
+		//If minimum distance has been reached, stop to align then SLAM!
 		if (distance <= MIN_ALIGN_DISTANCE) {
 			reached = true;
 		}
 		if (reached) {
-			if((slide == 0 ) || aligned){
+			if(slide == 0 || aligned) {
 				aligned = true;
-				dt.setDrive(-.70 , -DriveTrain.getHeading().turnRate(), 0);
+				forward = -0.7;
+				slide = 0;
+				turn = -DriveTrain.getHeading().turnRate();
 			} else {
-				dt.setDrive(0, -DriveTrain.getHeading().turnRate(), slide);
-				//dt.setDrive(0, -DriveTrain.getHeading().turnRate(), 0);
+				forward = 0;
+				slide = -rawSlide;
+				turn = -DriveTrain.getHeading().turnRate();
 			}
 		}
 		else {
-			double fwdpow = (distance - 28) / 175 + 0.52;
-			if(fwdpow > .7) {
-				fwdpow = .7;
+			double forwardPower = (distance - 28) / 175 + 0.52;
+			if(forwardPower > .7) {
+				forwardPower = .7;
 			}
-				dt.setDrive(-fwdpow, -DriveTrain.getHeading().turnRate(), slide);
-				//dt.setDrive(0, -DriveTrain.getHeading().turnRate(), 0);
+			//Adjust heading target based on turn.
 			if(distance > 60) {
-				DriveTrain.getHeading().incrementTargetAngle(turn);
+				DriveTrain.getHeading().incrementTargetAngle(rawTurn);
 			}
+			
+			forward = -forwardPower;
+			slide = -rawSlide;
+			turn = -DriveTrain.getHeading().turnRate();
 		}
 	}
 	
-	public double distance() {
+	/**
+	 * Returns the reported distance from the pi vision program.
+	 * 
+	 * @return double the distance in inches.
+	 */
+	private double rawDistance() {
 		return table.getNumber("distance", 704);
 	}
 	
-	public double slide() {
+	/**
+	 * Returns the reported slide offset from the pi vision program.
+	 * 
+	 * @return double a value from -1.0 to 1.0
+	 */
+	private double rawSlide() {
 		return table.getNumber("slideRate", 704);
 	}
 	
+	/**
+	 * Returns the reported turn offset from the pi vision program.
+	 * 
+	 * @return int a turn value from -5 to 5.
+	 */
+	private int rawTurn() {
+		return (int)table.getNumber("rateTurn", 704);
+	}
+	
+	/**
+	 * Returns the calculated forward rate.
+	 * 
+	 * @return double a speed from -1.0 to 1.0
+	 */
+	public double forward() {
+		return forward;
+	}
+	
+	/**
+	 * Returns the calculated slide rate.
+	 * 
+	 * @return double a speed from -1.0 to 1.0
+	 */
+	public double slide() {
+		return slide;
+	}
+	
+	/**
+	 * Returns the calculated turn rate.
+	 * 
+	 * @return double a speed from -1.0 to 1.0
+	 */
 	public double turn() {
-		return table.getNumber("rateTurn", 704);
+		return turn;
 	}
 }

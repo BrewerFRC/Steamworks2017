@@ -1,87 +1,84 @@
 package org.usfirst.frc.team4564.robot;
 
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/**
+ * Handles the functions and state of the thrower subsystem.
+ * 
+ * @author Brewer FIRST Robotics Team 4564
+ * @author Evan McCoy
+ * @author Jacob Cote
+ */
 public class Thrower {
-	private PID pid;
-	private EncoderRate rate;
 	private Spark flywheel;
 	private Talon feeder;
-	public Encoder encoder;
 	public static Xbox j = new Xbox(0);
-	private boolean spinning;
 	
-	//global variables for throwerState class
 	public ThrowerState state;
 	public int flywheelRPM = 3300; //Ideal RPM target for flywheel.
 	public double feederRate = .5;  //Ideal RPM for flywheel feeder.
 	
+	/**
+	 * Intantiates a new Thrower subsystem with the defined PID values.
+	 * 
+	 * @param p the P scaler.
+	 * @param i the integral scaler.
+	 * @param d the derivative scaler.
+	 */
 	public Thrower(double p, double i, double d) {
-		pid = new PID(p, i, d, true, "thrower");
-		pid.setOutputLimits(-1, 1);
 		state = new ThrowerState(this);
+		
+		//Instantiate motor controllers.
 		flywheel = new Spark(Constants.PWM_FLYWHEEL);
 		feeder = new Talon(Constants.PWM_FEEDER_INTAKE);
 		flywheel.setInverted(true);
-		encoder = new Encoder(Constants.DIO_FLYWHEEL_ENCODER_A,
-				Constants.DIO_FLYWHEEL_ENCODER_B,
-				false, EncodingType.k4X);
-		encoder.setDistancePerPulse(1.0 / Constants.FLYWHEEL_COUNTS_PER_ROT);
-		encoder.setSamplesToAverage(12);
-		
-		rate = new EncoderRate(encoder);
-		rate.setSampleRate(1000);
-		//new Thread(rate).start();
 	}
 	
-	public void setPIDOn(boolean on) {
-		this.spinning = on;
-	}
-	
-	public PID getPID() {
-		return this.pid;
-	}
-	
-	public void setFlywheelSpeed(double speed) {
-		flywheel.set(speed);
-	}
-	
-	public void update() {
-		pid.update();
-		if (spinning) {
-			double speed = pid.calc(getRPM());
-			SmartDashboard.putNumber("pidCalc", speed);
-			flywheel.set(speed);
-		}
-	}
-	
+	/**
+	 * Returns the current flywheel speed in rotations per minute.
+	 * 
+	 * @return the speed in RPM.
+	 */
 	public double getRPM() {
-		//int rpm = (int)(encoder.getRate() * 60);s
-		double rpmNew = rate.getRate();
-		int rpm = (int)(encoder.getRate() * 60);
-		SmartDashboard.putNumber("rpm", rpm);
-		return rpm;
+		//int rpm = (int)(encoder.getRate() * 60);
+		return 0/*rpm*/;
 	}
 	
+	/**
+	 * Whether or not the flywheel is spun up and reaty to shoot.
+	 * 
+	 * @return boolean whether or not the thrower is ready.
+	 */
 	public boolean ready() {
-		return Math.abs(pid.getTarget() - getRPM()) < Constants.FLYWHEEL_RPM_ALLOWED_ERROR;
+		return Math.abs(/*target*/ - getRPM()) < Constants.FLYWHEEL_RPM_ALLOWED_ERROR;
 	}
 	
-	//Methods for state cases
-	//Sets flywheel RPM
+	/**
+	 * Sets the speed of the flywheel.
+	 * 
+	 * @param rpm the speed in rotations per minute.
+	 */
 	public void setSpeed(int rpm) {
-		pid.setTarget(rpm);
+		//pid.setTarget(rpm);
 	}
 	
-	//Sets flywheel feeder to input value
+	/**
+	 * Sets the motor power for the feeder intake.
+	 * 
+	 * @param input a motor power from -1.0 to 1.0.
+	 */
 	public void setFeederIntake(double input) {
 		feeder.set(input);
 	}
 	
+	/**
+	 * Handles the state progression of the shooting process.
+	 * 
+	 * @author Brewer FIRST Robotics Team 4564
+	 * @author Jacob Cote
+	 * @author Evan McCoy
+	 */
 	public class ThrowerState {
 		public static final int INIT  = 0; //Any initilazation steps
 		public static final int READY = 1;  //Ready to begin firing process
@@ -92,7 +89,6 @@ public class Thrower {
 		
 		private Thrower thrower;
 		private int currentState;
-		private long verificationTimer;
 		public long clearTimer;
 		
 		public ThrowerState(Thrower thrower) {
