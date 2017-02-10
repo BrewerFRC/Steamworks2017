@@ -86,6 +86,7 @@ public class Robot extends SampleRobot {
     			slide = gearVision.slide();
     		}
     		else {
+    			DriveTrain.getHeading().setHeadingHold(false);
     			forward = j.getY(GenericHID.Hand.kLeft);
     			turn  = j.getX(GenericHID.Hand.kRight);
     			if (j.getPressed("leftTrigger")) {

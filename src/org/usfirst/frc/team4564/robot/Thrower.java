@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Talon;
  * @author Brewer FIRST Robotics Team 4564
  * @author Evan McCoy
  * @author Jacob Cote
+ * @author Wataru Nakata
  */
 public class Thrower {
 	private CANTalon flywheel;
