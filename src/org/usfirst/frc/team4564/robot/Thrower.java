@@ -1,9 +1,7 @@
 package org.usfirst.frc.team4564.robot;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.TalonControlMode;
-
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
 
 /**
@@ -15,9 +13,11 @@ import edu.wpi.first.wpilibj.Spark;
  * @author Wataru Nakata
  */
 public class Thrower {
-	private CANTalon flywheel;
+	private Spark flywheel;
 	private Spark feeder;
 	private Spark intake;
+	private Encoder flywheelEncoder;
+	private PID flywheelPID;
 	public static Xbox j = new Xbox(0);
 	
 	public ThrowerState state;
@@ -36,25 +36,11 @@ public class Thrower {
 		state = new ThrowerState(this);
 		
 		//Instantiate motor controllers.
-		flywheel = new CANTalon(Constants.CANID_FLYWHEEL);
+		flywheel = new Spark(Constants.PWM_THROWER_FLYWHEEL);
 		feeder = new Spark(Constants.PWM_THROWER_INTERNAL_INTAKE);
 		intake = new Spark(Constants.PWM_THROWER_INTAKE);
-		
-		flywheel.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-		flywheel.reverseSensor(false);
-		flywheel.configEncoderCodesPerRev(Constants.FLYWHEEL_COUNTS_PER_ROT);
-		flywheel.configNominalOutputVoltage(+0.0f, -0.0f);
-		flywheel.configPeakOutputVoltage(+12.0f, -12.0f);
-		
-		//Set pid controller in talon SRX
-		flywheel.setProfile(0);
-		flywheel.setF(0);
-		flywheel.setP(p);
-		flywheel.setI(i);
-		flywheel.setD(d);
-		
-		flywheel.changeControlMode(TalonControlMode.Speed);
-		
+		flywheelEncoder = new Encoder(Constants.DIO_FLYWHEEL_ENCODER_A, Constants.DIO_FLYWHEEL_ENCODER_B, false, EncodingType.k1X);
+		flywheelPID = new PID(p, i, d, true, "flywheel");
 	}
 	
 	/**
@@ -63,7 +49,7 @@ public class Thrower {
 	 * @return the speed in RPM.
 	 */
 	public double getRPM() {
-		return flywheel.getEncVelocity()/10240.0*1500;
+		return flywheelEncoder.getRate() * 60 / 1024;
 	}
 	
 	/**
@@ -72,7 +58,7 @@ public class Thrower {
 	 * @return boolean whether or not the thrower is ready.
 	 */
 	public boolean ready() {
-		return Math.abs(flywheel.getClosedLoopError()/10240.0*1500) < Constants.FLYWHEEL_RPM_ALLOWED_ERROR;
+		return Math.abs(getRPM() - flywheelPID.getTarget()) < Constants.FLYWHEEL_RPM_ALLOWED_ERROR;
 	}
 	
 	/**
@@ -81,7 +67,7 @@ public class Thrower {
 	 * @param rpm the speed in rotations per minute.
 	 */
 	public void setSpeed(int rpm) {
-		flywheel.set(rpm);
+		flywheelPID.setTarget(rpm);
 	}
 	
 	/**
@@ -117,6 +103,14 @@ public class Thrower {
 		else {
 			intakeOn();
 		}
+	}
+	
+	/**
+	 * Updates the PID coefficients and PID calc.
+	 */
+	public void update() {
+		flywheelPID.update();
+		flywheel.set(flywheelPID.calc(getRPM()));
 	}
 	
 	/**

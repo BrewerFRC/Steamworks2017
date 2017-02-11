@@ -122,6 +122,7 @@ public class Robot extends SampleRobot {
     		}
     		
     		//Update subsystems.
+    		thrower.update();
     		thrower.state.update();
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;

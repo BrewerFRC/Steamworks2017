@@ -12,11 +12,12 @@ public class Constants {
 	//Drive train
 	public static final int PWM_DRIVE_BR = 1, PWM_DRIVE_FR = 2, PWM_DRIVE_BL = 3, PWM_DRIVE_FL = 4;
 	public static final int PWM_DRIVE_SR = 5, PWM_DRIVE_SL = 6;
+	public static final int DIO_DRIVE_ENCODER_A = 0, DIO_DRIVE_ENCODER_B = 1;
 	
 	//Thrower
-	public static final int PWM_THROWER_INTAKE = 7, PWM_THROWER_INTERNAL_INTAKE = 8;
-	public static final int CANID_FLYWHEEL = 0, CANID_PDP = 1;
+	public static final int PWM_THROWER_INTAKE = 7, PWM_THROWER_INTERNAL_INTAKE = 8, PWM_THROWER_FLYWHEEL = 0;
 	public static final int FLYWHEEL_COUNTS_PER_ROT = 1024, FLYWHEEL_RPM_ALLOWED_ERROR = 1000;
+	public static final int DIO_FLYWHEEL_ENCODER_A = 2, DIO_FLYWHEEL_ENCODER_B = 3;
 	
 	//Climber
 	public static final int PWM_CLIMB = 9;
