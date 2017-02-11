@@ -33,8 +33,8 @@ public class DriveTrain extends RobotDrive {
     	slide = slide * 0.6;
     	turn = turn * 0.85;
     	arcadeDrive(drive, turn);
-    	SlideL.set(-slide - turn * 0.1);
-    	SlideR.set(slide - turn * 0.1);
+    	SlideL.set(slide - turn * 0.1);
+    	SlideR.set(-slide - turn * 0.1);
     }
     
     public static Heading getHeading() {

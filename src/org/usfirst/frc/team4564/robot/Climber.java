@@ -18,6 +18,14 @@ public class Climber {
 		return climbMotor.get();
 	}
 	
+	public void forward() {
+		setPower(0.8);
+	}
+	
+	public void backward() {
+		setPower(-0.8);
+	}
+	
 	public double getAmpage()
 	{
 		return pdp.getCurrent(Constants.CLIMBER_POW_CHANNEL);

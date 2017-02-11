@@ -4,7 +4,7 @@ import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
-import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.Spark;
 
 /**
  * Handles the functions and state of the thrower subsystem.
@@ -16,15 +16,17 @@ import edu.wpi.first.wpilibj.Talon;
  */
 public class Thrower {
 	private CANTalon flywheel;
-	private Talon feeder;
+	private Spark feeder;
+	private Spark intake;
 	public static Xbox j = new Xbox(0);
 	
 	public ThrowerState state;
-	public int flywheelRPM = 3300; //Ideal RPM target for flywheel.
-	public double feederRate = .5;  //Ideal RPM for flywheel feeder.
+	private static final int flywheelRPM = 3300; //Ideal RPM target for flywheel.
+	private static final double feederRate = 0.5;  //Ideal RPM for flywheel feeder.
+	private static final double intakeRate = 1.0;
 	
 	/**
-	 * Intantiates a new Thrower subsystem with the defined PID values.
+	 * Instantiates a new Thrower subsystem with the defined PID values.
 	 * 
 	 * @param p the P scaler.
 	 * @param i the integral scaler.
@@ -35,7 +37,8 @@ public class Thrower {
 		
 		//Instantiate motor controllers.
 		flywheel = new CANTalon(Constants.CANID_FLYWHEEL);
-		feeder = new Talon(Constants.PWM_FEEDER_INTAKE);
+		feeder = new Spark(Constants.PWM_THROWER_INTERNAL_INTAKE);
+		intake = new Spark(Constants.PWM_THROWER_INTAKE);
 		
 		flywheel.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 		flywheel.reverseSensor(false);
@@ -60,7 +63,6 @@ public class Thrower {
 	 * @return the speed in RPM.
 	 */
 	public double getRPM() {
-		//int rpm = (int)(encoder.getRate() * 60);
 		return flywheel.getEncVelocity()/10240.0*1500;
 	}
 	
@@ -89,6 +91,32 @@ public class Thrower {
 	 */
 	public void setFeederIntake(double input) {
 		feeder.set(input);
+	}
+	
+	/**
+	 * Runs the external intake.
+	 */
+	public void intakeOn() {
+		intake.set(intakeRate);
+	}
+	
+	/**
+	 * Shuts off the external intake.
+	 */
+	public void intakeOff() {
+		intake.set(0);
+	}
+	
+	/**
+	 * Toggles the external intake.
+	 */
+	public void toggleIntake() {
+		if (intake.get() > 0) {
+			intakeOff();
+		}
+		else {
+			intakeOn();
+		}
 	}
 	
 	/**
@@ -155,7 +183,7 @@ public class Thrower {
 					break;
 				case SPIN_UP:
 					Common.debug("SPIN_UP: Spinning up flywheel");
-					thrower.setSpeed(thrower.flywheelRPM);
+					thrower.setSpeed(flywheelRPM);
 					if(thrower.ready()) {
 						currentState = READY_TO_FIRE;
 					} else {
@@ -168,7 +196,7 @@ public class Thrower {
 					break;
 				case FIRE:
 					Common.debug("FIRE: Activating flywheel feeder, firing ball");
-					thrower.setFeederIntake(thrower.feederRate);
+					thrower.setFeederIntake(feederRate);
 					
 					break;
 				case CLEAR_SHOOTER:

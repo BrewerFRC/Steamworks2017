@@ -1,5 +1,6 @@
 package org.usfirst.frc.team4564.robot;
 
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 /**
@@ -15,6 +16,7 @@ public class GearVision {
 	public static final int MIN_ALIGN_DISTANCE = 35;
 	public static final int MAX_ALIGN_DISTANCE = 150;
 	
+	private Solenoid ringLight;
 	private NetworkTable table;
 	
 	private boolean reached;

@@ -1,7 +1,8 @@
 package org.usfirst.frc.team4564.robot;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -21,6 +22,7 @@ public class Robot extends SampleRobot {
 	private static GearVision gearVision;
 	private Xbox j ;
 	public static NetworkTable table;
+	Solenoid ringLight = new Solenoid(7);
 	
 	/**
 	 * Instantiates all subsystems.
@@ -76,8 +78,8 @@ public class Robot extends SampleRobot {
     		double forward = 0;
     		double turn = 0;
     		double slide = 0;
-    		if (j.getPressed("a")) {
-    			if (j.when("a")) {
+    		if (j.getPressed("b")) {
+    			if (j.when("b")) {
     				gearVision.start();
     			}
     			gearVision.track();
@@ -88,7 +90,7 @@ public class Robot extends SampleRobot {
     		else {
     			DriveTrain.getHeading().setHeadingHold(false);
     			forward = j.getY(GenericHID.Hand.kLeft);
-    			turn  = j.getX(GenericHID.Hand.kRight);
+    			turn  = j.getX(GenericHID.Hand.kLeft);
     			if (j.getPressed("leftTrigger")) {
         			slide = -j.getLeftTrigger();
         		}
@@ -98,6 +100,26 @@ public class Robot extends SampleRobot {
     		}
     		
     		dt.setDrive(forward, turn, slide);
+    		
+    		if (j.getY(GenericHID.Hand.kRight) < -0.5) {
+    			//Climber down
+    		}
+    		else if (j.getY(GenericHID.Hand.kRight) > 0.5) {
+    			//Climber up
+    		}
+    		
+    		if (j.when("x")) {
+    			thrower.toggleIntake();
+    		}
+    		
+    		if (j.when("rightBumper")) {
+    			if (ringLight.get()) {
+    				ringLight.set(false);
+    			}
+    			else {
+    				ringLight.set(true);
+    			}
+    		}
     		
     		//Update subsystems.
     		thrower.state.update();
