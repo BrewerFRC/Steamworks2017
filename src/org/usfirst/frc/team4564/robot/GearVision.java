@@ -58,6 +58,12 @@ public class GearVision {
 	 */
 	public void track() {
 		double distance = rawDistance();
+		if (distance == 704) {
+			forward = 0;
+			slide = 0;
+			turn = 0;
+			return;
+		}
 		
 		//Slide calculation
 		double rawSlide = rawSlide() / 3.0;
