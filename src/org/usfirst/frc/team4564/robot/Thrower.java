@@ -1,7 +1,8 @@
 package org.usfirst.frc.team4564.robot;
 
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.Encoder;
+import com.ctre.CANTalon;
+import com.ctre.CANTalon.TalonControlMode;
+
 import edu.wpi.first.wpilibj.Spark;
 
 /**
@@ -13,17 +14,18 @@ import edu.wpi.first.wpilibj.Spark;
  * @author Wataru Nakata
  */
 public class Thrower {
-	private Spark flywheel;
+	private CANTalon flywheel0, flywheel1;
 	private Spark feeder;
 	private Spark intake;
-	private Encoder flywheelEncoder;
 	private PID flywheelPID;
 	public static Xbox j = new Xbox(0);
 	
 	public ThrowerState state;
-	private static final int flywheelRPM = 3300; //Ideal RPM target for flywheel.
-	private static final double feederRate = 0.5;  //Ideal RPM for flywheel feeder.
+	private static final int flywheelRPM = 2200; //Ideal RPM target for flywheel.
+	private static final double feederRate = -0.5;  //Ideal RPM for flywheel feeder.
 	private static final double intakeRate = 1.0;
+	
+	private boolean engaged = false;
 	
 	/**
 	 * Instantiates a new Thrower subsystem with the defined PID values.
@@ -36,10 +38,14 @@ public class Thrower {
 		state = new ThrowerState(this);
 		
 		//Instantiate motor controllers.
-		flywheel = new Spark(Constants.PWM_THROWER_FLYWHEEL);
+		flywheel0 = new CANTalon(Constants.CANID_THROWER_FLYWHEEL_0);
+		flywheel0.changeControlMode(TalonControlMode.PercentVbus);
+		flywheel1 = new CANTalon(Constants.CANID_THROWER_FLYWHEEL_1);
+		flywheel1.changeControlMode(TalonControlMode.PercentVbus);
+		flywheel1.configEncoderCodesPerRev(1024);
+		
 		feeder = new Spark(Constants.PWM_THROWER_INTERNAL_INTAKE);
 		intake = new Spark(Constants.PWM_THROWER_INTAKE);
-		flywheelEncoder = new Encoder(Constants.DIO_FLYWHEEL_ENCODER_A, Constants.DIO_FLYWHEEL_ENCODER_B, false, EncodingType.k1X);
 		flywheelPID = new PID(p, i, d, true, "flywheel");
 	}
 	
@@ -49,11 +55,11 @@ public class Thrower {
 	 * @return the speed in RPM.
 	 */
 	public double getRPM() {
-		return flywheelEncoder.getRate() * 60 / 1024;
+		return flywheel1.getEncVelocity()/10240.0*1500;
 	}
 	
 	/**
-	 * Whether or not the flywheel is spun up and reaty to shoot.
+	 * Whether or not the flywheel is spun up and ready to shoot.
 	 * 
 	 * @return boolean whether or not the thrower is ready.
 	 */
@@ -67,6 +73,7 @@ public class Thrower {
 	 * @param rpm the speed in rotations per minute.
 	 */
 	public void setSpeed(int rpm) {
+		engaged = rpm != 0;
 		flywheelPID.setTarget(rpm);
 	}
 	
@@ -110,7 +117,14 @@ public class Thrower {
 	 */
 	public void update() {
 		flywheelPID.update();
-		flywheel.set(flywheelPID.calc(getRPM()));
+		if (engaged) {
+			flywheel0.set(flywheelPID.calc(getRPM()));
+			flywheel1.set(flywheelPID.calc(getRPM()));
+		}
+		else {
+			flywheel0.set(0);
+			flywheel1.set(0);
+		}
 	}
 	
 	/**

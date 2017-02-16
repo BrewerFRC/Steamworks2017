@@ -29,6 +29,7 @@ public class GearVision {
 	public GearVision() {
 		i = this;
 		table = NetworkTable.getTable("visionTracking");
+		ringLight = new Solenoid(Constants.SOL_VISION_RINGLIGHT);
 	}
 	
 	public boolean checkReady() {
@@ -38,16 +39,18 @@ public class GearVision {
 	
 	public void start() {
 		reset();
-		DriveTrain.getHeading().setHeadingHold(true);
+		Robot.getDriveTrain().getHeading().setHeadingHold(true);
+		ringLight.set(true);
 	}
 	
 	public void reset() {
-		DriveTrain.getHeading().setHeadingHold(false);
+		Robot.getDriveTrain().getHeading().setHeadingHold(false);
 		reached = false;
 		aligned = false;
 		turn = 0;
 		slide = 0;
 		forward = 0;
+		ringLight.set(false);
 	}
 
 	/**
@@ -79,11 +82,11 @@ public class GearVision {
 				aligned = true;
 				forward = -0.7;
 				slide = 0;
-				turn = -DriveTrain.getHeading().turnRate();
+				turn = -Robot.getDriveTrain().getHeading().turnRate();
 			} else {
 				forward = 0;
 				slide = -rawSlide;
-				turn = -DriveTrain.getHeading().turnRate();
+				turn = -Robot.getDriveTrain().getHeading().turnRate();
 			}
 		}
 		else {
@@ -93,12 +96,12 @@ public class GearVision {
 			}
 			//Adjust heading target based on turn.
 			if(distance > 60) {
-				DriveTrain.getHeading().incrementTargetAngle(rawTurn);
+				Robot.getDriveTrain().getHeading().incrementTargetAngle(rawTurn);
 			}
 			
 			forward = -forwardPower;
 			slide = -rawSlide;
-			turn = -DriveTrain.getHeading().turnRate();
+			turn = -Robot.getDriveTrain().getHeading().turnRate();
 		}
 	}
 	

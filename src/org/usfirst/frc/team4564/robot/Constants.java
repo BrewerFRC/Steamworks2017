@@ -15,13 +15,15 @@ public class Constants {
 	public static final int DIO_DRIVE_ENCODER_A = 0, DIO_DRIVE_ENCODER_B = 1;
 	
 	//Thrower
-	public static final int PWM_THROWER_INTAKE = 7, PWM_THROWER_INTERNAL_INTAKE = 8, PWM_THROWER_FLYWHEEL = 0;
+	public static final int PWM_THROWER_INTAKE = 7, PWM_THROWER_INTERNAL_INTAKE = 8;
+	public static final int CANID_THROWER_FLYWHEEL_0 = 12, CANID_THROWER_FLYWHEEL_1 = 13;
 	public static final int FLYWHEEL_COUNTS_PER_ROT = 1024, FLYWHEEL_RPM_ALLOWED_ERROR = 1000;
 	public static final int DIO_FLYWHEEL_ENCODER_A = 2, DIO_FLYWHEEL_ENCODER_B = 3;
 	
 	//Climber
 	public static final int PWM_CLIMB = 9;
 	public static final int CLIMBER_POW_CHANNEL = 15;
+	public static final int CANID_PDP = 1;
 	
 	//System
 	public static final int REFRESH_RATE = 50;
@@ -30,4 +32,5 @@ public class Constants {
 	public static final double SLIDE_MAX = 1;
 	public static final double FORWARD_MIN = .39;
 	public static final double TURN_MIN = 0;
+	public static final int SOL_VISION_RINGLIGHT = 7;
 }

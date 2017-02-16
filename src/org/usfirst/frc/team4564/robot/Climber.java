@@ -12,7 +12,7 @@ public class Climber {
 		pdp = new PowerDistributionPanel(Constants.CANID_PDP);
 	}
 	public void setPower(double power){
-		climbMotor.set(power);
+		climbMotor.set(-power);
 	}
 	public double getPower(){
 		return climbMotor.get();
@@ -24,6 +24,10 @@ public class Climber {
 	
 	public void backward() {
 		setPower(-0.8);
+	}
+	
+	public void stop() {
+		setPower(0.0);
 	}
 	
 	public double getAmpage()

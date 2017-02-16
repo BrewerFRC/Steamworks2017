@@ -2,9 +2,9 @@ package org.usfirst.frc.team4564.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SampleRobot;
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The driver class for the FIRST Steamworks 2017 robot challenge.
@@ -20,18 +20,21 @@ public class Robot extends SampleRobot {
 	private static DriveTrain dt;
 	private static Thrower thrower;
 	private static GearVision gearVision;
+	private static Climber climber;
+	private static Auto auto;
 	private Xbox j ;
 	public static NetworkTable table;
-	Solenoid ringLight = new Solenoid(7);
 	
 	/**
 	 * Instantiates all subsystems.
 	 */
     public Robot() {
     	instance = this;
-    	dt = new DriveTrain();
+    	dt = new DriveTrain(DriveTrain.P, DriveTrain.I, DriveTrain.D);
     	thrower = new Thrower(0.000012, 0, 0.008);
     	gearVision = new GearVision();
+    	climber = new Climber();
+    	auto = new Auto();
     	j = new Xbox(0);
     }
     
@@ -39,17 +42,19 @@ public class Robot extends SampleRobot {
      * Initializes all subsystems.
      */
     public void robotInit() {
-    	dt.init();
+    	
     }
 
     /**
      * Robot autonomous mode.
      */
     public void autonomous() {
+    	auto.init();
     	while (isEnabled() && isAutonomous()) {
     		long time = Common.time();
     		
-    		
+    		auto.auto();
+    		dt.update();
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
      	    Timer.delay((delay > 0) ? delay : 0.001);
@@ -61,6 +66,7 @@ public class Robot extends SampleRobot {
      */
     public void operatorControl() {
     	long time;
+    	boolean wasFiring = false;
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		
@@ -88,7 +94,7 @@ public class Robot extends SampleRobot {
     			slide = gearVision.slide();
     		}
     		else {
-    			DriveTrain.getHeading().setHeadingHold(false);
+    			dt.getHeading().setHeadingHold(false);
     			forward = j.getY(GenericHID.Hand.kLeft);
     			turn  = j.getX(GenericHID.Hand.kLeft);
     			if (j.getPressed("leftTrigger")) {
@@ -101,29 +107,36 @@ public class Robot extends SampleRobot {
     		
     		dt.setDrive(forward, turn, slide);
     		
+    		//Climber
     		if (j.getY(GenericHID.Hand.kRight) < -0.5) {
-    			//Climber down
+    			climber.setPower(j.getY(GenericHID.Hand.kRight));
     		}
     		else if (j.getY(GenericHID.Hand.kRight) > 0.5) {
-    			//Climber up
+    			climber.setPower(j.getY(GenericHID.Hand.kRight));
+    		}
+    		else {
+    			climber.stop();
     		}
     		
+    		//Thrower
     		if (j.when("x")) {
     			thrower.toggleIntake();
     		}
     		
-    		if (j.when("rightBumper")) {
-    			if (ringLight.get()) {
-    				ringLight.set(false);
-    			}
-    			else {
-    				ringLight.set(true);
-    			}
+    		if (j.getPressed("a")) {
+    			wasFiring = true;
+    			thrower.state.fire();
     		}
+    		else if (wasFiring) {
+    			wasFiring = false;
+    			thrower.state.stopFiring();
+    		}
+    		SmartDashboard.putNumber("throwerRPM", thrower.getRPM());
     		
     		//Update subsystems.
     		thrower.update();
     		thrower.state.update();
+    		dt.update();
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);
