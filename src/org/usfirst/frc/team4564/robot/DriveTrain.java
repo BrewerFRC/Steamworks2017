@@ -30,6 +30,13 @@ public class DriveTrain extends RobotDrive {
 	private Encoder encoder;
 	private PID drivePID;
 	private Supplier<Boolean> driveComplete;
+	
+	double driveSpeed = 0;
+	double turnSpeed = 0;
+	double slideSpeed = 0;
+	double driveAccel = .08;
+	double turnAccel = .08;
+	double slideAccel = 1;
 
 	public DriveTrain(double p, double i, double d) {
 		super(FrontL, BackL, FrontR, BackR);
@@ -46,12 +53,58 @@ public class DriveTrain extends RobotDrive {
 		SmartDashboard.putNumber("encoderCount", encoder.get());
 	}
 	
-    public void setDrive(double drive, double turn, double slide) {
-    	slide = slide * 0.6;
-    	turn = turn * 0.85;
+	//target = target speed (desired speed), driveSpeed = current speed
+		 public double driveAccelCurve(double target, double driveAccel) {
+			 if (Math.abs(driveSpeed - target) > driveAccel) {
+		            if (driveSpeed > target) {
+		                driveSpeed = driveSpeed - driveAccel;
+		            } else {
+		                driveSpeed = driveSpeed + driveAccel;
+		            }
+		        } else {
+		            driveSpeed = target;
+		        }
+		        return driveSpeed;
+		 }
+		 
+		 public double turnAccelCurve(double target, double turnAccel) {
+			 if (Math.abs(turnSpeed - target) > turnAccel) {
+		    		if (turnSpeed > target) {
+		    			turnSpeed = turnSpeed - turnAccel;
+		    		} else {
+		    			turnSpeed = turnSpeed + turnAccel;
+		    		}
+		    	} else {
+		    		turnSpeed = target;
+		    	}
+		    return turnSpeed;
+		}
+		 
+		 public double slideAccelCurve(double target, double slideAccel) {
+			 if (Math.abs(slideSpeed - target) > slideAccel) {
+		    		if (slideSpeed > target) {
+		    			slideSpeed = slideSpeed - slideAccel;
+		    		} else {
+		    			slideSpeed = slideSpeed + slideAccel;
+		    		}
+		    	} else {
+		    		slideSpeed = target;
+		    	}
+		    return slideSpeed;
+		}
+	public void setDrive(double drive, double turn, double slide) {
+		arcadeDrive(drive,turn);
+		SlideL.set(slide);
+    	SlideR.set(-slide);
+	}
+	
+    public void accelDrive(double drive, double turn, double slide) {
+    	drive = driveAccelCurve(drive, driveAccel );
+		turn = turnAccelCurve(turn, turnAccel);
+		slide = slideAccelCurve(slide, slideAccel);
     	arcadeDrive(drive, turn);
-    	SlideL.set(slide - turn * 0.1);
-    	SlideR.set(-slide - turn * 0.1);
+    	SlideL.set(slide);
+    	SlideR.set(-slide);
     }
     
     public void driveDistance(double distance) {

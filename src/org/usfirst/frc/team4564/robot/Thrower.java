@@ -21,7 +21,7 @@ public class Thrower {
 	public static Xbox j = new Xbox(0);
 	
 	public ThrowerState state;
-	private static final int flywheelRPM = 2200; //Ideal RPM target for flywheel.
+	private static final int flywheelRPM = 2800; //Ideal RPM target for flywheel.
 	private static final double feederRate = -0.5;  //Ideal RPM for flywheel feeder.
 	private static final double intakeRate = 1.0;
 	
@@ -89,8 +89,14 @@ public class Thrower {
 	/**
 	 * Runs the external intake.
 	 */
+	public void setIntake(double speed) {
+		intake.set(speed);
+	}
+	
 	public void intakeOn() {
 		intake.set(intakeRate);
+		Common.debug("Turing On Intake");
+		setFeederIntake(.25);
 	}
 	
 	/**
@@ -98,6 +104,8 @@ public class Thrower {
 	 */
 	public void intakeOff() {
 		intake.set(0);
+		Common.debug("Turing Off Intake");
+		setFeederIntake(0);
 	}
 	
 	/**
@@ -189,32 +197,41 @@ public class Thrower {
 				case READY:
 					Common.debug("READY: Ready to begin firing process");
 					break;
+					
 				case SPIN_UP:
 					Common.debug("SPIN_UP: Spinning up flywheel");
 					thrower.setSpeed(flywheelRPM);
+					thrower.intakeOn();
 					if(thrower.ready()) {
 						currentState = READY_TO_FIRE;
 					} else {
 						currentState = SPIN_UP;
 					}
 					break;
+					
 				case READY_TO_FIRE:
 					Common.debug("READY_TO_FIRE: Flywheel up to speed");
 					currentState = FIRE;
 					break;
+					
 				case FIRE:
 					Common.debug("FIRE: Activating flywheel feeder, firing ball");
 					thrower.setFeederIntake(feederRate);
-					
+					clearTimer = Common.time() + 500;
+		
 					break;
 				case CLEAR_SHOOTER:
 					Common.debug("CLEAR_SHOOTER: Clearing channel of balls");
-					thrower.setFeederIntake(0);
+					thrower.intakeOff();
 					thrower.setSpeed(0);
-					thrower.setFeederIntake(-1);
-					if(Common.time() >= clearTimer) {
-						thrower.setFeederIntake(0);
-						currentState = READY;
+					thrower.setFeederIntake(1);
+					if(Common.time() >= clearTimer)
+						if(intake.get() > 0) {
+							thrower.setFeederIntake(.25);
+							currentState = READY;
+						} else { 
+							thrower.setFeederIntake(0);
+							currentState = READY;
 					}
 					break;
 			}

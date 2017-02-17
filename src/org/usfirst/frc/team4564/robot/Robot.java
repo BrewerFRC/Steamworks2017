@@ -105,13 +105,13 @@ public class Robot extends SampleRobot {
         		}
     		}
     		
-    		dt.setDrive(forward, turn, slide);
+    		dt.accelDrive(forward, turn, slide);
     		
     		//Climber
-    		if (j.getY(GenericHID.Hand.kRight) < -0.5) {
+    		if (j.getY(GenericHID.Hand.kRight) < -0.2) {
     			climber.setPower(j.getY(GenericHID.Hand.kRight));
     		}
-    		else if (j.getY(GenericHID.Hand.kRight) > 0.5) {
+    		else if (j.getY(GenericHID.Hand.kRight) > 0.2) {
     			climber.setPower(j.getY(GenericHID.Hand.kRight));
     		}
     		else {
@@ -123,6 +123,12 @@ public class Robot extends SampleRobot {
     			thrower.toggleIntake();
     		}
     		
+    		if (j.getPressed("y")) {
+    			thrower.setIntake(-1.0);
+    		} else {
+    			thrower.intakeOff();
+    		}
+    		
     		if (j.getPressed("a")) {
     			wasFiring = true;
     			thrower.state.fire();
@@ -132,6 +138,7 @@ public class Robot extends SampleRobot {
     			thrower.state.stopFiring();
     		}
     		SmartDashboard.putNumber("throwerRPM", thrower.getRPM());
+    		SmartDashboard.putNumber("slide", slide);
     		
     		//Update subsystems.
     		thrower.update();

@@ -66,10 +66,10 @@ public class GearVision {
 		}
 		
 		//Slide calculation
-		double rawSlide = rawSlide() / 3.0;
+		double rawSlide = -rawSlide() / 3.0;
 		int sign = (rawSlide < 0) ? -1 : 1;
 		if(!(rawSlide == 0)) {
-			rawSlide = sign * (Math.abs(rawSlide) + 0.49);
+			rawSlide = sign * (Math.abs(rawSlide) + 0.23);
 		}
 		
 		//Turn calculation
@@ -86,7 +86,7 @@ public class GearVision {
 		if (reached) {
 			if(slide == 0 || aligned) {
 				aligned = true;
-				forward = -0.7;
+				forward = -0.6;
 				slide = 0;
 				turn = -Robot.getDriveTrain().getHeading().turnRate();
 			} else {
@@ -97,12 +97,13 @@ public class GearVision {
 		}
 		else {
 			double forwardPower = (distance - 28) / 175 + 0.52;
-			if(forwardPower > .7) {
+			if(forwardPower > .7 ) {
 				forwardPower = .7;
 			}
+			forwardPower = .58;
 			//Adjust heading target based on turn.
 			if(distance > 60) {
-				Robot.getDriveTrain().getHeading().incrementTargetAngle(rawTurn);
+				//Robot.getDriveTrain().getHeading().incrementTargetAngle(rawTurn);
 			}
 			
 			forward = -forwardPower;
