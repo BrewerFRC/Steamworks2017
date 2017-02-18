@@ -216,7 +216,6 @@ public class Thrower {
 					
 				case READY_TO_FIRE:
 					Common.debug("READY_TO_FIRE: Flywheel up to speed");
-					currentState = FIRE;
 					break;
 					
 				case FIRE:

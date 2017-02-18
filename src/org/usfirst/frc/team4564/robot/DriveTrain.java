@@ -92,6 +92,16 @@ public class DriveTrain extends RobotDrive {
 		    	}
 		    return slideSpeed;
 		}
+		 
+	public void manualDrive(double fl, double bl, double fr, double br, double sl, double sr) {
+		FrontL.set(fl);
+		BackL.set(bl);
+		FrontR.set(fr);
+		BackR.set(br);
+		SlideL.set(sl);
+		SlideR.set(sr);
+	}
+	
 	public void setDrive(double drive, double turn, double slide) {
 		arcadeDrive(drive,turn);
 		SlideL.set(slide);

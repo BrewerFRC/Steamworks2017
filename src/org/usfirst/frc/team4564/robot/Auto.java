@@ -9,7 +9,8 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  * @author Evan McCoy
  */
 public class Auto {
-	private static final int DRIVE_GEAR = 0, ALIGN_GEAR = 1, TRACK_GEAR = 2;
+	private static final int DRIVE_GEAR = 0, ALIGN_GEAR = 1, TRACK_GEAR = 2, DRIVE_HOPPER = 3, SLIDE_HOPPER = 4, 
+			DRIVE_BOILER = 5, PIVOT_BOILER = 6, SHOOT = 7;
 	private static final int LEFT = 0, CENTER = 1, RIGHT = 2;
 	private static final int RED = 0;
 	
@@ -18,7 +19,9 @@ public class Auto {
 
 	private int startingPosition; //Starting position 0-2, left to right from drive station.
 	private int alliance; //0 for red, 1 for blue
+	private int action; //0 for gears, 1 for shooting
 	private int state; //Current auto state of the robot.
+	private long timer;
 	
 	public Auto() {
 		dt = Robot.getDriveTrain();
@@ -36,7 +39,9 @@ public class Auto {
 	 * Auto update and state control method.
 	 */
 	public void auto() {
-		switch(startingPosition) {
+		
+		if (action == 0) {
+			switch(startingPosition) {
 			case LEFT:
 				leftGear();
 				break;
@@ -46,21 +51,26 @@ public class Auto {
 			case RIGHT: 
 				rightGear();
 				break;
+			}
+			
+			double forward = 0;
+			double turn = 0;
+			double slide = 0;
+			if (state == TRACK_GEAR) {
+				forward = GearVision.i.forward();
+				turn = GearVision.i.turn();
+				slide = GearVision.i.slide();
+			}
+			else {
+				forward = dt.calcDrive();
+				turn = dt.getHeading().turnRate();
+			}
+			dt.setDrive(forward, turn, slide);
 		}
-		
-		double forward = 0;
-		double turn = 0;
-		double slide = 0;
-		if (state == TRACK_GEAR) {
-			forward = GearVision.i.forward();
-			turn = GearVision.i.turn();
-			slide = GearVision.i.slide();
+		else if (action == 1) {
+			state = DRIVE_HOPPER;
+			shoot();
 		}
-		else {
-			forward = dt.calcDrive();
-			turn = dt.getHeading().turnRate();
-		}
-		dt.setDrive(forward, turn, slide);
 	}
 	
 	/**
@@ -139,6 +149,41 @@ public class Auto {
 					dt.resetDrive();
 					GearVision.i.track();
 					Common.debug("auto: Tracking gear.");
+				}
+				break;
+		}
+	}
+	
+	public void shoot() {
+		switch (state) {
+			case DRIVE_HOPPER:
+				dt.driveDistance(-105);
+				state = SLIDE_HOPPER;
+				break;
+			case SLIDE_HOPPER:
+				if (dt.driveComplete()) {
+					double slide = (alliance == RED) ? 1.0 : -1.0;
+					dt.setDrive(0, 0, slide);
+					timer = Common.time() + 3000;
+					state = DRIVE_BOILER;
+				}
+				break;
+			case DRIVE_BOILER:
+				if (Common.time() >= timer) {
+					dt.driveDistance(60);
+					state = PIVOT_BOILER;
+				}
+				break;
+			case PIVOT_BOILER:
+				if (dt.driveComplete()) {
+					dt.manualDrive(0.5, 0.5, 0, 0, 0, 0);
+					timer = Common.time() + 1000;
+					state = SHOOT;
+				}
+				break;
+			case SHOOT:
+				if (Common.time() >= timer) {
+					Robot.getThrower().state.fire();
 				}
 				break;
 		}
