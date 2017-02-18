@@ -162,14 +162,32 @@ public class Robot extends SampleRobot {
     	}
     }
     
+    /**
+     * Gets the highest joystick x value from the defined hand.
+     * 
+     * @param hand the hand to get the value from.
+     * @return double the value.
+     */
     public double joystickX(GenericHID.Hand hand) {
     	return (j0.getX(hand) > j1.getX(hand)) ? j0.getX(hand) : j1.getX(hand);
     }
     
+    /**
+     * Gets the highest joystick y value from the defined hand.
+     * 
+     * @param hand the hand to get the value from.
+     * @return double the value.
+     */
     public double joystickY(GenericHID.Hand hand) {
     	return (j0.getY(hand) > j1.getY(hand)) ? j0.getY(hand) : j1.getY(hand);
     }
     
+    /**
+     * Gets the highest joystick trigger value from the defined hand.
+     * 
+     * @param hand the hand to get the value from.
+     * @return double the value.
+     */
     public double joystickTrigger(GenericHID.Hand hand) {
     	return (j0.getTriggerAxis(hand) > j1.getTriggerAxis(hand)) ? j0.getTriggerAxis(hand) : j1.getTriggerAxis(hand);
     }
