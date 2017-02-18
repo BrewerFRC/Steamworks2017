@@ -32,7 +32,7 @@ public class Robot extends SampleRobot {
     public Robot() {
     	instance = this;
     	dt = new DriveTrain(DriveTrain.P, DriveTrain.I, DriveTrain.D);
-    	thrower = new Thrower(0.000012, 0, 0.008);
+    	thrower = new Thrower();
     	gearVision = new GearVision();
     	climber = new Climber();
     	auto = new Auto();
@@ -77,20 +77,24 @@ public class Robot extends SampleRobot {
     		if (gearVision.checkReady()) {
     			j0.setRumble(RumbleType.kLeftRumble, 0.3);
     			j0.setRumble(RumbleType.kRightRumble, 0.3);
+    			j1.setRumble(RumbleType.kLeftRumble, 0.3);
+    			j1.setRumble(RumbleType.kRightRumble, 0.3);
     		}
     		else if (!j0.getPressed("b")) {
     			j0.setRumble(RumbleType.kLeftRumble, 0);
     			j0.setRumble(RumbleType.kRightRumble, 0);
+    			j1.setRumble(RumbleType.kLeftRumble, 0);
+    			j1.setRumble(RumbleType.kRightRumble, 0);
     		}
     		
     		//Robot movement control.
     		double forward = 0;
     		double turn = 0;
     		double slide = 0;
-    		if (j0.when("b")) {
+    		if (j0.when("x") || j1.when("x")) {
 				gearVision.start();
 			}
-    		if (j0.getPressed("b")) {	
+    		if (j0.getPressed("x") || j1.getPressed("x")) {	
     			gearVision.track();
     			forward = gearVision.forward();
     			turn = gearVision.turn();
@@ -104,31 +108,32 @@ public class Robot extends SampleRobot {
 	    			//dt.getHeading().setHeadingHold(false);
 	    			wasGear = false;
     			}
-    			forward = j0.getY(GenericHID.Hand.kLeft);
-    			turn  = j0.getX(GenericHID.Hand.kLeft);
-    			if (j0.getPressed("leftTrigger")) {
-        			slide = -j0.getLeftTrigger();
+    			forward = joystickY(GenericHID.Hand.kLeft);
+    			turn  = joystickX(GenericHID.Hand.kLeft);
+    			if (j0.getPressed("leftTrigger") || j1.getPressed("leftTrigger")) {
+        			slide = -joystickTrigger(GenericHID.Hand.kLeft);
         		}
-        		else if (j0.getPressed("rightTrigger")) {
-        			slide = j0.getRightTrigger();
+        		else if (j0.getPressed("rightTrigger") || j1.getPressed("rightTrigger")) {
+        			slide = joystickTrigger(GenericHID.Hand.kRight);
         		}
     		}
     		dt.accelDrive(forward, turn, slide);
     		
     		//Climber
-    		if (j1.getY(GenericHID.Hand.kRight) < -0.2) {
-    			climber.setPower(j1.getY(GenericHID.Hand.kRight));
+    		if (joystickY(GenericHID.Hand.kRight) < -0.2) {
+    			climber.setPower(joystickY(GenericHID.Hand.kRight));
     		}
-    		else if (j1.getY(GenericHID.Hand.kRight) > 0.2) {
-    			climber.setPower(j1.getY(GenericHID.Hand.kRight));
+    		else if (joystickY(GenericHID.Hand.kRight) > 0.2) {
+    			climber.setPower(joystickY(GenericHID.Hand.kRight));
     		}
     		else {
     			climber.stop();
     		}
     		
     		//Thrower
-    		if (j1.when("x")) {
+    		if (j1.when("a") || j0.when("a")) {
     			thrower.toggleIntake();
+    			thrower.setFeederIntake(.25);
     		}
 //    		if (j.getPressed("y")) {
 //    			thrower.setIntake(-1.0);
@@ -136,7 +141,7 @@ public class Robot extends SampleRobot {
 //    			//thrower.intakeOff();
 //    		}
 //    		
-    		if (j1.getPressed("a")) {
+    		if (j1.getPressed("b") || j0.getPressed("b")) {
     			wasFiring = true;
     			thrower.state.fire();
     		}
@@ -157,12 +162,26 @@ public class Robot extends SampleRobot {
     	}
     }
     
+    public double joystickX(GenericHID.Hand hand) {
+    	return (j0.getX(hand) > j1.getX(hand)) ? j0.getX(hand) : j1.getX(hand);
+    }
+    
+    public double joystickY(GenericHID.Hand hand) {
+    	return (j0.getY(hand) > j1.getY(hand)) ? j0.getY(hand) : j1.getY(hand);
+    }
+    
+    public double joystickTrigger(GenericHID.Hand hand) {
+    	return (j0.getTriggerAxis(hand) > j1.getTriggerAxis(hand)) ? j0.getTriggerAxis(hand) : j1.getTriggerAxis(hand);
+    }
+    
     /**
      * Executes when the robot is disabled.
      */
     public void disabled() {
     	j0.setRumble(RumbleType.kLeftRumble, 0);
 		j0.setRumble(RumbleType.kRightRumble, 0);
+		j1.setRumble(RumbleType.kLeftRumble, 0);
+		j1.setRumble(RumbleType.kRightRumble, 0);
     }
     
     /**
