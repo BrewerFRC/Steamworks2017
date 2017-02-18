@@ -1,14 +1,14 @@
 package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.Talon;
 
 public class Climber {
-	private Spark climbMotor;
+	private Talon climbMotor;
 	private PowerDistributionPanel pdp;
 	
 	public Climber(){
-		climbMotor = new Spark(Constants.PWM_CLIMB);
+		climbMotor = new Talon(Constants.PWM_CLIMB);
 		pdp = new PowerDistributionPanel(Constants.CANID_PDP);
 	}
 	public void setPower(double power){

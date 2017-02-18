@@ -38,19 +38,21 @@ public class GearVision {
 	}
 	
 	public void start() {
+		Common.debug("start called");
 		reset();
 		Robot.getDriveTrain().getHeading().setHeadingHold(true);
 		ringLight.set(true);
+		Common.debug("start end!!!!!!!!!!!!!");
 	}
 	
 	public void reset() {
-		Robot.getDriveTrain().getHeading().setHeadingHold(false);
+		//Robot.getDriveTrain().getHeading().setHeadingHold(false);
 		reached = false;
 		aligned = false;
 		turn = 0;
 		slide = 0;
 		forward = 0;
-		ringLight.set(false);
+		ringLight.set(true);
 	}
 
 	/**
@@ -90,8 +92,10 @@ public class GearVision {
 				slide = 0;
 				turn = -Robot.getDriveTrain().getHeading().turnRate();
 			} else {
-				forward = 0;
+//				forward = 0;
 				slide = -rawSlide;
+				forward = 0;
+				slide = 0;
 				turn = -Robot.getDriveTrain().getHeading().turnRate();
 			}
 		}
@@ -109,6 +113,8 @@ public class GearVision {
 			forward = -forwardPower;
 			slide = -rawSlide;
 			turn = -Robot.getDriveTrain().getHeading().turnRate();
+			//forward = 0;
+		
 		}
 	}
 	

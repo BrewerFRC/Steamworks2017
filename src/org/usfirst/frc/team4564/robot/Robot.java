@@ -22,7 +22,8 @@ public class Robot extends SampleRobot {
 	private static GearVision gearVision;
 	private static Climber climber;
 	private static Auto auto;
-	private Xbox j ;
+	private Xbox j1;
+	private Xbox j0;
 	public static NetworkTable table;
 	
 	/**
@@ -35,7 +36,8 @@ public class Robot extends SampleRobot {
     	gearVision = new GearVision();
     	climber = new Climber();
     	auto = new Auto();
-    	j = new Xbox(0);
+    	j0 = new Xbox(0);
+    	j1 = new Xbox(1);
     }
     
     /**
@@ -67,69 +69,74 @@ public class Robot extends SampleRobot {
     public void operatorControl() {
     	long time;
     	boolean wasFiring = false;
+    	boolean wasGear = false;
+    	gearVision.reset();
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
-    		
     		//Inform drivers if gear vision is ready to activate.
     		if (gearVision.checkReady()) {
-    			j.setRumble(RumbleType.kLeftRumble, 0.3);
-    			j.setRumble(RumbleType.kRightRumble, 0.3);
+    			j0.setRumble(RumbleType.kLeftRumble, 0.3);
+    			j0.setRumble(RumbleType.kRightRumble, 0.3);
     		}
-    		else if (!j.getPressed("a")) {
-    			j.setRumble(RumbleType.kLeftRumble, 0);
-    			j.setRumble(RumbleType.kRightRumble, 0);
+    		else if (!j0.getPressed("b")) {
+    			j0.setRumble(RumbleType.kLeftRumble, 0);
+    			j0.setRumble(RumbleType.kRightRumble, 0);
     		}
     		
     		//Robot movement control.
     		double forward = 0;
     		double turn = 0;
     		double slide = 0;
-    		if (j.getPressed("b")) {
-    			if (j.when("b")) {
-    				gearVision.start();
-    			}
+    		if (j0.when("b")) {
+				gearVision.start();
+			}
+    		if (j0.getPressed("b")) {	
     			gearVision.track();
     			forward = gearVision.forward();
     			turn = gearVision.turn();
     			slide = gearVision.slide();
+    			wasGear = true;
+    			//Common.debug("track called" + turn);
     		}
     		else {
-    			dt.getHeading().setHeadingHold(false);
-    			forward = j.getY(GenericHID.Hand.kLeft);
-    			turn  = j.getX(GenericHID.Hand.kLeft);
-    			if (j.getPressed("leftTrigger")) {
-        			slide = -j.getLeftTrigger();
+    			if(wasGear){
+	    			gearVision.reset();
+	    			//dt.getHeading().setHeadingHold(false);
+	    			wasGear = false;
+    			}
+    			forward = j0.getY(GenericHID.Hand.kLeft);
+    			turn  = j0.getX(GenericHID.Hand.kLeft);
+    			if (j0.getPressed("leftTrigger")) {
+        			slide = -j0.getLeftTrigger();
         		}
-        		else if (j.getPressed("rightTrigger")) {
-        			slide = j.getRightTrigger();
+        		else if (j0.getPressed("rightTrigger")) {
+        			slide = j0.getRightTrigger();
         		}
     		}
-    		
     		dt.accelDrive(forward, turn, slide);
     		
     		//Climber
-    		if (j.getY(GenericHID.Hand.kRight) < -0.2) {
-    			climber.setPower(j.getY(GenericHID.Hand.kRight));
+    		if (j1.getY(GenericHID.Hand.kRight) < -0.2) {
+    			climber.setPower(j1.getY(GenericHID.Hand.kRight));
     		}
-    		else if (j.getY(GenericHID.Hand.kRight) > 0.2) {
-    			climber.setPower(j.getY(GenericHID.Hand.kRight));
+    		else if (j1.getY(GenericHID.Hand.kRight) > 0.2) {
+    			climber.setPower(j1.getY(GenericHID.Hand.kRight));
     		}
     		else {
     			climber.stop();
     		}
     		
     		//Thrower
-    		if (j.when("x")) {
+    		if (j1.when("x")) {
     			thrower.toggleIntake();
     		}
-    		
-    		if (j.getPressed("y")) {
-    			thrower.setIntake(-1.0);
-    		} else {
-    			thrower.intakeOff();
-    		}
-    		
-    		if (j.getPressed("a")) {
+//    		if (j.getPressed("y")) {
+//    			thrower.setIntake(-1.0);
+//    		} else  {
+//    			//thrower.intakeOff();
+//    		}
+//    		
+    		if (j1.getPressed("a")) {
     			wasFiring = true;
     			thrower.state.fire();
     		}
@@ -154,8 +161,8 @@ public class Robot extends SampleRobot {
      * Executes when the robot is disabled.
      */
     public void disabled() {
-    	j.setRumble(RumbleType.kLeftRumble, 0);
-		j.setRumble(RumbleType.kRightRumble, 0);
+    	j0.setRumble(RumbleType.kLeftRumble, 0);
+		j0.setRumble(RumbleType.kRightRumble, 0);
     }
     
     /**
