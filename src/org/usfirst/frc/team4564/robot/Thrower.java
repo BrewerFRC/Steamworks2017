@@ -66,7 +66,10 @@ public class Thrower {
 	public double getRPM() {
 		return flywheel1.getEncVelocity()/10240.0*1500;
 	}
-	
+	public void deployFlipper()
+	{
+		flipper.set(1);
+	}
 	/**
 	 * Whether or not the flywheel is spun up and ready to shoot.
 	 * 
@@ -221,6 +224,7 @@ public class Thrower {
 					
 				case READY_TO_FIRE:
 					Common.debug("READY_TO_FIRE: Flywheel up to speed");
+					currentState = FIRE;
 					break;
 					
 				case FIRE:
