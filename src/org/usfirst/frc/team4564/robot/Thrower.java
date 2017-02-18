@@ -4,6 +4,7 @@ import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Handles the functions and state of the thrower subsystem.
@@ -21,7 +22,7 @@ public class Thrower {
 	public static Xbox j = new Xbox(0);
 	
 	public ThrowerState state;
-	private static final int flywheelRPM = 2800; //Ideal RPM target for flywheel.
+	private static int flywheelRPM = 2800; //Ideal RPM target for flywheel.
 	private static final double feederRate = -0.5;  //Ideal RPM for flywheel feeder.
 	private static final double intakeRate = 1.0;
 	
@@ -47,6 +48,8 @@ public class Thrower {
 		feeder = new Spark(Constants.PWM_THROWER_INTERNAL_INTAKE);
 		intake = new Spark(Constants.PWM_THROWER_INTAKE);
 		flywheelPID = new PID(p, i, d, true, "flywheel");
+		
+		SmartDashboard.putNumber("Target Flywheel RPM", flywheelRPM);
 	}
 	
 	/**
@@ -96,7 +99,6 @@ public class Thrower {
 	public void intakeOn() {
 		intake.set(intakeRate);
 		Common.debug("Turing On Intake");
-		setFeederIntake(.25);
 	}
 	
 	/**
@@ -105,7 +107,6 @@ public class Thrower {
 	public void intakeOff() {
 		intake.set(0);
 		Common.debug("Turing Off Intake");
-		setFeederIntake(0);
 	}
 	
 	/**
@@ -125,6 +126,7 @@ public class Thrower {
 	 */
 	public void update() {
 		flywheelPID.update();
+		flywheelRPM = (int) SmartDashboard.getNumber("Target Flywheel RPM", flywheelRPM);
 		if (engaged) {
 			flywheel0.set(flywheelPID.calc(getRPM()));
 			flywheel1.set(flywheelPID.calc(getRPM()));
@@ -225,13 +227,11 @@ public class Thrower {
 					thrower.intakeOff();
 					thrower.setSpeed(0);
 					thrower.setFeederIntake(1);
-					if(Common.time() >= clearTimer)
-						if(intake.get() > 0) {
-							thrower.setFeederIntake(.25);
-							currentState = READY;
-						} else { 
-							thrower.setFeederIntake(0);
-							currentState = READY;
+					if(Common.time() >= clearTimer) {
+						thrower.setFeederIntake(0);
+						currentState = READY;
+					} else { 
+						currentState = CLEAR_SHOOTER;
 					}
 					break;
 			}

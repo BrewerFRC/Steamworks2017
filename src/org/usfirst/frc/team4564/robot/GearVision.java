@@ -107,7 +107,7 @@ public class GearVision {
 			forwardPower = .58;
 			//Adjust heading target based on turn.
 			if(distance > 60) {
-				//Robot.getDriveTrain().getHeading().incrementTargetAngle(rawTurn);
+				Robot.getDriveTrain().getHeading().incrementTargetAngle(rawTurn);
 			}
 			
 			forward = -forwardPower;

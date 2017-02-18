@@ -129,6 +129,7 @@ public class Robot extends SampleRobot {
     		//Thrower
     		if (j1.when("x")) {
     			thrower.toggleIntake();
+    			thrower.setFeederIntake(.25);
     		}
 //    		if (j.getPressed("y")) {
 //    			thrower.setIntake(-1.0);
