@@ -213,6 +213,15 @@ public class Robot extends SampleRobot {
     }
     
     /**
+     * An instance of the robot Thrower.
+     * 
+     * @return Thrower an instance of Thrower.
+     */
+    public static Thrower getThrower() {
+    	return thrower;
+    }
+    
+    /**
      * An instance of the main Robot class.
      * 
      * @return Robot the main instance of Robot.
