@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  */
 public class GearVision {
 	public static GearVision i;
-	public static final int MIN_ALIGN_DISTANCE = 35;
+	public static final int MIN_ALIGN_DISTANCE = 40;
 	public static final int MAX_ALIGN_DISTANCE = 150;
 	
 	private Solenoid ringLight;
@@ -31,6 +31,7 @@ public class GearVision {
 		i = this;
 		table = NetworkTable.getTable("visionTracking");
 		ringLight = new Solenoid(Constants.SOL_VISION_RINGLIGHT);
+		bat = new Bat();
 	}
 	
 	public boolean checkReady() {
@@ -61,12 +62,6 @@ public class GearVision {
 	 */
 	public void track() {
 		double distance = rawDistance();
-		if (distance == 704) {
-			forward = 0;
-			slide = 0;
-			turn = 0;
-			return;
-		}
 		
 		//Slide calculation
 		double rawSlide = -rawSlide() / 3.0;
@@ -80,7 +75,13 @@ public class GearVision {
 //		if (distance < 70) {
 //			rawTurn /= -4.504*Math.log(distance) - 18.3;
 //		}
-		rawTurn /= 40.0;
+		rawTurn /= 10.0;
+		if (distance == 704 && !(reached || aligned)) {
+			forward = 0;
+			slide = 0;
+			turn = 0;
+			return;
+		}
 		
 		//If minimum distance has been reached, stop to align then SLAM!
 		if (distance <= MIN_ALIGN_DISTANCE) {
@@ -88,8 +89,12 @@ public class GearVision {
 		}
 		if (reached) {
 			if(slide == 0 || aligned) {
-				if (bat.getDistance() < 10){
-					forward = 0;
+				if (bat.getDistance() < 15){
+					if(bat.getDistance() <13){
+						forward = 0.58;
+					}else{
+						forward = 0;
+					}
 				}else{
 					forward = -0.6;
 				}
@@ -97,7 +102,6 @@ public class GearVision {
 				slide = 0;
 				turn = -Robot.getDriveTrain().getHeading().turnRate();
 			} else {
-//				forward = 0;
 				slide = -rawSlide;
 				forward = 0;
 				slide = 0;
@@ -111,14 +115,13 @@ public class GearVision {
 			}
 			forwardPower = .58;
 			//Adjust heading target based on turn.
-			if(distance > 40) {
-				Robot.getDriveTrain().getHeading().incrementTargetAngle(rawTurn);
+			if((distance > 60) && distance != 704) {
+				Robot.getDriveTrain().getHeading().incrementTargetAngle(-rawTurn);
 			}
 			
 			forward = -forwardPower;
 			slide = -rawSlide;
 			turn = -Robot.getDriveTrain().getHeading().turnRate();
-			forward = 0;
 		
 		}
 	}
@@ -128,6 +131,9 @@ public class GearVision {
 	 * 
 	 * @return double the distance in inches.
 	 */
+	public double sonicDistance(){
+		return bat.getDistance();
+	}
 	private double rawDistance() {
 		return table.getNumber("distance", 704);
 	}

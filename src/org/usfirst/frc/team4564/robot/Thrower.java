@@ -3,6 +3,7 @@ package org.usfirst.frc.team4564.robot;
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.TalonControlMode;
 
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -19,6 +20,7 @@ public class Thrower {
 	private Spark feeder;
 	private Spark intake;
 	private PID flywheelPID;
+	private Servo flipper;
 	public static Xbox j = new Xbox(0);
 	
 	public ThrowerState state;
@@ -52,6 +54,7 @@ public class Thrower {
 		intake = new Spark(Constants.PWM_THROWER_INTAKE);
 		flywheelPID = new PID(P, I, D, true, "flywheel");
 		
+		flipper = new Servo(Constants.SERVO);
 		SmartDashboard.putNumber("Target Flywheel RPM", flywheelRPM);
 	}
 	
@@ -63,7 +66,10 @@ public class Thrower {
 	public double getRPM() {
 		return flywheel1.getEncVelocity()/10240.0*1500;
 	}
-	
+	public void deployFlipper()
+	{
+		flipper.set(1);
+	}
 	/**
 	 * Whether or not the flywheel is spun up and ready to shoot.
 	 * 
@@ -170,6 +176,7 @@ public class Thrower {
 		 * Sets the thrower to firing state if prepared, otherwise the thrower continues to spin up.
 		 */
 		public void fire() {
+			flipper.set(-1);
 			Common.debug("Fire Order Issued: Checking flywheel is ready.");
 			if(currentState == READY_TO_FIRE) {
 				Common.debug("Flywheel up to speed: Firing");
@@ -232,6 +239,7 @@ public class Thrower {
 					Common.debug("CLEAR_SHOOTER: Clearing channel of balls");
 					thrower.intakeOff();
 					thrower.setSpeed(0);
+					flipper.set(1);
 					thrower.setFeederIntake(1);
 					if(Common.time() >= clearTimer) {
 						thrower.setFeederIntake(0);
