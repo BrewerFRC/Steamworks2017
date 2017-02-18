@@ -18,6 +18,7 @@ public class GearVision {
 	
 	private Solenoid ringLight;
 	private NetworkTable table;
+	private Bat bat;
 	
 	private boolean reached;
 	private boolean aligned;
@@ -76,9 +77,9 @@ public class GearVision {
 		
 		//Turn calculation
 		double rawTurn = rawTurn();
-		if (distance < 70) {
-			rawTurn /= -4.504*Math.log(distance) - 18.3;
-		}
+//		if (distance < 70) {
+//			rawTurn /= -4.504*Math.log(distance) - 18.3;
+//		}
 		rawTurn /= 40.0;
 		
 		//If minimum distance has been reached, stop to align then SLAM!
@@ -87,8 +88,12 @@ public class GearVision {
 		}
 		if (reached) {
 			if(slide == 0 || aligned) {
+				if (bat.getDistance() < 10){
+					forward = 0;
+				}else{
+					forward = -0.6;
+				}
 				aligned = true;
-				forward = -0.6;
 				slide = 0;
 				turn = -Robot.getDriveTrain().getHeading().turnRate();
 			} else {
@@ -106,14 +111,14 @@ public class GearVision {
 			}
 			forwardPower = .58;
 			//Adjust heading target based on turn.
-			if(distance > 60) {
-				//Robot.getDriveTrain().getHeading().incrementTargetAngle(rawTurn);
+			if(distance > 40) {
+				Robot.getDriveTrain().getHeading().incrementTargetAngle(rawTurn);
 			}
 			
 			forward = -forwardPower;
 			slide = -rawSlide;
 			turn = -Robot.getDriveTrain().getHeading().turnRate();
-			//forward = 0;
+			forward = 0;
 		
 		}
 	}
