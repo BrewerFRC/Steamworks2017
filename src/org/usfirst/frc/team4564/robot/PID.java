@@ -77,6 +77,15 @@ public class PID {
 	}
 	
 	/**
+	 * Sets the starting output of a forward PID.
+	 * 
+	 * @param output the starting output value.
+	 */
+	public void setStartingOutput(double output) {
+		this.output = output;
+	}
+	
+	/**
 	 * Returns the target value of the PID controller.
 	 * 
 	 * @return double the current target value.
@@ -154,6 +163,7 @@ public class PID {
 	public void reset() {
 		sumError = 0;
 		previousError = 0;
+		output = 0;
 	}
 	
 	/**

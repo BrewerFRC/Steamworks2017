@@ -25,9 +25,9 @@ public class Thrower {
 	private static int flywheelRPM = 2800; //Ideal RPM target for flywheel.
 	private static final double feederRate = -0.5;  //Ideal RPM for flywheel feeder.
 	private static final double intakeRate = 1.0;
-	private static final double p = 0.000012;
-	private static final double i = 0;
-	private static final double d = 0.008;
+	private static final double P = 0.000012;
+	private static final double I = 0;
+	private static final double D = 0.008;
 	
 	private boolean engaged = false;
 	
@@ -50,7 +50,7 @@ public class Thrower {
 		
 		feeder = new Spark(Constants.PWM_THROWER_INTERNAL_INTAKE);
 		intake = new Spark(Constants.PWM_THROWER_INTAKE);
-		flywheelPID = new PID(p, i, d, true, "flywheel");
+		flywheelPID = new PID(P, I, D, true, "flywheel");
 		
 		SmartDashboard.putNumber("Target Flywheel RPM", flywheelRPM);
 	}
@@ -182,6 +182,7 @@ public class Thrower {
 		 * Sets the thrower to spin up state.
 		 */
 		public void spinUp() {
+			flywheelPID.reset();
 			currentState = SPIN_UP;
 		}
 		
