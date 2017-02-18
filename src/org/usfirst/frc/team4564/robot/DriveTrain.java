@@ -43,7 +43,7 @@ public class DriveTrain extends RobotDrive {
 		
 		encoder = new Encoder(Constants.DIO_DRIVE_ENCODER_A, Constants.DIO_DRIVE_ENCODER_B, false, EncodingType.k1X);
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
-		encoder.setDistancePerPulse(1 / 88.897);
+		encoder.setDistancePerPulse(109.5/17688.0);
 		drivePID = new PID(p, i, d, false, "drive");
 	}
 	

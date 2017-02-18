@@ -169,7 +169,7 @@ public class Robot extends SampleRobot {
      * @return double the value.
      */
     public double joystickX(GenericHID.Hand hand) {
-    	return (j0.getX(hand) > j1.getX(hand)) ? j0.getX(hand) : j1.getX(hand);
+    	return (Math.abs(j0.getX(hand)) > Math.abs(j1.getX(hand))) ? j0.getX(hand) : j1.getX(hand);
     }
     
     /**
@@ -179,7 +179,7 @@ public class Robot extends SampleRobot {
      * @return double the value.
      */
     public double joystickY(GenericHID.Hand hand) {
-    	return (j0.getY(hand) > j1.getY(hand)) ? j0.getY(hand) : j1.getY(hand);
+    	return (Math.abs(j0.getY(hand)) > Math.abs(j1.getY(hand))) ? j0.getY(hand) : j1.getY(hand);
     }
     
     /**
@@ -189,7 +189,7 @@ public class Robot extends SampleRobot {
      * @return double the value.
      */
     public double joystickTrigger(GenericHID.Hand hand) {
-    	return (j0.getTriggerAxis(hand) > j1.getTriggerAxis(hand)) ? j0.getTriggerAxis(hand) : j1.getTriggerAxis(hand);
+    	return (Math.abs(j0.getTriggerAxis(hand)) > Math.abs(j1.getTriggerAxis(hand))) ? j0.getTriggerAxis(hand) : j1.getTriggerAxis(hand);
     }
     
     /**

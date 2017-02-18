@@ -17,7 +17,7 @@ public class Constants {
 	//Thrower
 	public static final int PWM_THROWER_INTAKE = 7, PWM_THROWER_INTERNAL_INTAKE = 8;
 	public static final int CANID_THROWER_FLYWHEEL_0 = 12, CANID_THROWER_FLYWHEEL_1 = 13;
-	public static final int FLYWHEEL_COUNTS_PER_ROT = 1024, FLYWHEEL_RPM_ALLOWED_ERROR = 1000;
+	public static final int FLYWHEEL_COUNTS_PER_ROT = 1024, FLYWHEEL_RPM_ALLOWED_ERROR = 100;
 	public static final int DIO_FLYWHEEL_ENCODER_A = 2, DIO_FLYWHEEL_ENCODER_B = 3;
 	
 	//Climber

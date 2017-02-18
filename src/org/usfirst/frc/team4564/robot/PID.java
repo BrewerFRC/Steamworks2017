@@ -190,8 +190,6 @@ public class PID {
 		
 		//Derivative calculation
 		double derivative = (error - previousError) / deltaTime;
-		Common.dashNum(this.name + "Derivative", derivative);
-		Common.dashNum(this.name + "internalD", d);
 		previousError = error;
 		
 		//Calculate output

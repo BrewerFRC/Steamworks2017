@@ -12,6 +12,7 @@ public class Auto {
 	private static final int DRIVE_GEAR = 0, ALIGN_GEAR = 1, TRACK_GEAR = 2;
 	private static final int LEFT = 0, CENTER = 1, RIGHT = 2;
 	private static final int RED = 0;
+	private static final int halfRobotWidth = 36/2;
 	
 	private static DriveTrain dt;
 	private static NetworkTable autoTable;
@@ -67,7 +68,7 @@ public class Auto {
 	 * Controls gear alignment on the left gear platform.
 	 */
 	public void leftGear() {
-		double forwardDistance = (alliance == RED) ? 107.4 : 112.6;
+		double forwardDistance = (alliance == RED) ? 107.4 - halfRobotWidth : 112.6 - halfRobotWidth;
 		double turn = 60;
 		
 		switch (state) {
@@ -97,7 +98,7 @@ public class Auto {
 	 * Controls gear alignment on the center gear platform.
 	 */
 	public void centerGear() {
-		double forwardDistance = 114.3 - 40/*Gear vision distance*/;
+		double forwardDistance = 114.3 - halfRobotWidth /*Gear vision distance*/;
 		switch (state) {
 			case DRIVE_GEAR:
 				dt.driveDistance(forwardDistance);
@@ -118,7 +119,7 @@ public class Auto {
 	 * Controls gear alignment on the right gear platform.
 	 */
 	public void rightGear() {
-		double forwardDistance = (alliance == RED) ? 112.6 : 107.4;
+		double forwardDistance = (alliance == RED) ? 112.6 - halfRobotWidth : 107.4 - halfRobotWidth;
 		double turn = -60;
 		
 		switch (state) {

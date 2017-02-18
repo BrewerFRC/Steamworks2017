@@ -79,7 +79,7 @@ public class Thrower {
 	 * @param rpm the speed in rotations per minute.
 	 */
 	public void setSpeed(int rpm) {
-		engaged = rpm != 0;
+		engaged = (rpm != 0);
 		flywheelPID.setTarget(rpm);
 	}
 	
@@ -131,8 +131,10 @@ public class Thrower {
 		flywheelPID.update();
 		flywheelRPM = (int) SmartDashboard.getNumber("Target Flywheel RPM", flywheelRPM);
 		if (engaged) {
-			flywheel0.set(flywheelPID.calc(getRPM()));
-			flywheel1.set(flywheelPID.calc(getRPM()));
+			double pidCalc = flywheelPID.calc(getRPM());
+			SmartDashboard.putNumber("flywheelPIDOutput", pidCalc);
+			flywheel0.set(pidCalc);
+			flywheel1.set(pidCalc);
 		}
 		else {
 			flywheel0.set(0);
