@@ -32,7 +32,7 @@ public class Robot extends SampleRobot {
     public Robot() {
     	instance = this;
     	dt = new DriveTrain(DriveTrain.P, DriveTrain.I, DriveTrain.D);
-    	thrower = new Thrower(0.000012, 0, 0.008);
+    	thrower = new Thrower();
     	gearVision = new GearVision();
     	climber = new Climber();
     	auto = new Auto();

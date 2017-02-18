@@ -25,6 +25,9 @@ public class Thrower {
 	private static int flywheelRPM = 2800; //Ideal RPM target for flywheel.
 	private static final double feederRate = -0.5;  //Ideal RPM for flywheel feeder.
 	private static final double intakeRate = 1.0;
+	private static final double p = 0.000012;
+	private static final double i = 0;
+	private static final double d = 0.008;
 	
 	private boolean engaged = false;
 	
@@ -35,7 +38,7 @@ public class Thrower {
 	 * @param i the integral scaler.
 	 * @param d the derivative scaler.
 	 */
-	public Thrower(double p, double i, double d) {
+	public Thrower() {
 		state = new ThrowerState(this);
 		
 		//Instantiate motor controllers.
