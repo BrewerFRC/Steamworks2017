@@ -67,6 +67,7 @@ public class Robot extends SampleRobot {
      * Robot teleoperated mode.
      */
     public void operatorControl() {
+    	thrower.deployFlipper();
     	long time;
     	boolean wasFiring = false;
     	boolean wasGear = false;
@@ -118,7 +119,7 @@ public class Robot extends SampleRobot {
         		}
     		}
     		dt.accelDrive(forward, turn, slide);
-    		
+    		SmartDashboard.putNumber("sonic", gearVision.sonicDistance());
     		//Climber
     		if (joystickY(GenericHID.Hand.kRight) < -0.2) {
     			climber.setPower(joystickY(GenericHID.Hand.kRight));

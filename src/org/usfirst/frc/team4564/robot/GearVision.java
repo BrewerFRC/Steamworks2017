@@ -31,6 +31,7 @@ public class GearVision {
 		i = this;
 		table = NetworkTable.getTable("visionTracking");
 		ringLight = new Solenoid(Constants.SOL_VISION_RINGLIGHT);
+		bat = new Bat();
 	}
 	
 	public boolean checkReady() {
@@ -128,6 +129,9 @@ public class GearVision {
 	 * 
 	 * @return double the distance in inches.
 	 */
+	public double sonicDistance(){
+		return bat.getDistance();
+	}
 	private double rawDistance() {
 		return table.getNumber("distance", 704);
 	}

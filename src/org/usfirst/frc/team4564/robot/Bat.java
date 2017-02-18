@@ -17,5 +17,6 @@ public class Bat {
 	// Distance right side of robot is from defensive wall
 	public double getDistance() {
 		return sonicRight.getVoltage() / VOLTS_PER_INCH;
+	}
 
 }

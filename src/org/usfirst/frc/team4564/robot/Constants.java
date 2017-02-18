@@ -14,11 +14,16 @@ public class Constants {
 	public static final int PWM_DRIVE_SR = 5, PWM_DRIVE_SL = 6;
 	public static final int DIO_DRIVE_ENCODER_A = 0, DIO_DRIVE_ENCODER_B = 1;
 	
+	//Sonic
+	public static final int SONIC_PIN = 3;
+
 	//Thrower
 	public static final int PWM_THROWER_INTAKE = 7, PWM_THROWER_INTERNAL_INTAKE = 8;
 	public static final int CANID_THROWER_FLYWHEEL_0 = 12, CANID_THROWER_FLYWHEEL_1 = 13;
 	public static final int FLYWHEEL_COUNTS_PER_ROT = 1024, FLYWHEEL_RPM_ALLOWED_ERROR = 1000;
 	public static final int DIO_FLYWHEEL_ENCODER_A = 2, DIO_FLYWHEEL_ENCODER_B = 3;
+	public static final int SERVO = 0;
+
 	
 	//Climber
 	public static final int PWM_CLIMB = 9;
