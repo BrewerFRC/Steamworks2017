@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 public class Heading {
 	public static final double P = 0.185;
 	public static final double I = 0.00005;
-	public static final double D = 250.0;
+	public static final double D = 0.1;//250.0;
 	
 	private ADXRS450_Gyro gyro;
 	//PID takes cumulative angles

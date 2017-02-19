@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.Talon;
  * @author Wataru Nakata
  */
 public class DriveTrain extends RobotDrive {
-	public static final double P = 0.005, I = 0, D = 0;
+	public static final double P = 0.05, I = 0, D = 0;
 	
 	private static Heading heading;
 	private static final Talon FrontL = new Talon(Constants.PWM_DRIVE_FL);
@@ -53,6 +53,7 @@ public class DriveTrain extends RobotDrive {
 	{
 		encoder.reset();
 		heading.reset();
+		drivePID.reset();
 	}
 	
 	public void update() {

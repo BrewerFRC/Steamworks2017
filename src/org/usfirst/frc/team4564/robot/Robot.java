@@ -58,7 +58,6 @@ public class Robot extends SampleRobot {
     		
     		auto.auto();
 //    		Common.debug("Autoning");
-    		dt.update();
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
      	    Timer.delay((delay > 0) ? delay : 0.001);
@@ -78,6 +77,7 @@ public class Robot extends SampleRobot {
     	while (isEnabled() && isOperatorControl()) {
     		time = Common.time();
     		//Inform drivers if gear vision is ready to activate.
+    		
     		if (gearVision.checkReady()) {
     			j0.setRumble(RumbleType.kLeftRumble, 0.3);
     			j0.setRumble(RumbleType.kRightRumble, 0.3);
@@ -147,6 +147,7 @@ public class Robot extends SampleRobot {
 //    			//thrower.intakeOff();
 //    		}
 //    		
+    		
     		if (j1.getPressed("b") || j0.getPressed("b")) {
     			wasFiring = true;
     			thrower.state.fire();
@@ -166,6 +167,24 @@ public class Robot extends SampleRobot {
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
     		Timer.delay((delay > 0) ? delay : 0.001);
     	}
+    }
+    
+    public void test(){
+    	dt.init();
+    	dt.getHeading().setHeadingHold(true);
+    	while (isEnabled() && isTest()) {
+    		long time = Common.time();
+    		if (j0.when("x"))
+        		dt.driveDistance(10);
+    		if(j0.when("y"))
+    			dt.relTurn(45);
+    		//    		Common.debug("Autoning");
+    		dt.drivebyPID();
+    		dt.update();
+    		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
+     	    Timer.delay((delay > 0) ? delay : 0.001);
+    	}
+    	
     }
     
     /**
