@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  * @author Jacob Cote
  */
 public class Auto {
-	private static final int CALC = 0, DRIVE_TO_TARGET = 1, TURN_TO_TARGET = 2, ALIGN = 3, 
+	private static final int CALC = 0, DRIVE_TO_TARGET = 1, TURN_TO_TARGET = 2, ALIGN = 3,GEAR_VISION = 4, 
 			DRIVE_HOPPER = 0, SLIDE_HOPPER = 1, DRIVE_BOILER = 2, PIVOT_BOILER = 3, SHOOT = 4;
 	private static final int LEFT = 0, CENTER = 1, RIGHT = 2;
 	private static final int ACTION_GEAR = 0, ACTION_BOILER = 1;
@@ -26,7 +26,6 @@ public class Auto {
 	private int state; //Current auto state of the robot.
 	private long timer;
 	
-	private boolean tracking;
 	private double distance;
 	private double turn;
 	
@@ -36,8 +35,8 @@ public class Auto {
 	}
 	
 	public void init() {
-		tracking = false;
 		state = CALC;
+		dt.getHeading().setHeadingHold(true);
 //		startingPosition = (int)autoTable.getNumber("startingPosition", -1);
 //		alliance = (int)autoTable.getNumber("alliance", -1);
 		startingPosition = LEFT;
@@ -49,8 +48,7 @@ public class Auto {
 	 * Auto update and state control method.
 	 */
 	public void auto() {
-		switch(action) {
-			case ACTION_GEAR:
+		if(action == ACTION_GEAR) {
 				switch(state) {
 					case CALC :
 						Common.debug("AUTO:CALC");
@@ -84,31 +82,34 @@ public class Auto {
 						break;
 						
 					case DRIVE_TO_TARGET:
-						Common.debug("Driving to the target" + distance);
+						Common.debug("Driving to the target :" + distance);
 						dt.driveDistance(distance);
 						state = TURN_TO_TARGET;
 						break;
 						
 					case TURN_TO_TARGET:
 						if (dt.driveComplete()) {
+							Common.debug("AUTO:turningToTarget :"+turn);
 							dt.turnTo(turn);
 							state = ALIGN;
+						}else{
+							dt.drivebyPID();
 						}
 						break;
 						
 					case ALIGN:
 						if (dt.driveComplete()) {
-							if (!tracking) {
-								GearVision.i.start();
-							}
-							GearVision.i.track();
-							dt.setDrive(GearVision.i.forward(),GearVision.i.turn() , GearVision.i.slide());
+							Common.debug("AUTO:GearTrackingStarted");
+							GearVision.i.start();
+							state = GEAR_VISION;
 						}
 						break;
+					case GEAR_VISION:
+						GearVision.i.track();
+						dt.setDrive(GearVision.i.forward(),GearVision.i.turn() , GearVision.i.slide());
+						break;
 				}
-				break;
-						
-			case ACTION_BOILER:
+		} else if(action == ACTION_BOILER) {
 				switch(state) {
 					case DRIVE_HOPPER:
 						dt.driveDistance(-105);
@@ -120,6 +121,8 @@ public class Auto {
 							dt.setDrive(0, 0, slide);
 							timer = Common.time() + 3000;
 							state = DRIVE_BOILER;
+						}else{
+							dt.drivebyPID();
 						}
 						break;
 					case DRIVE_BOILER:
@@ -133,6 +136,8 @@ public class Auto {
 							dt.manualDrive(0.5, 0.5, 0, 0, 0, 0);
 							timer = Common.time() + 1000;
 							state = SHOOT;
+						}else{
+							dt.drivebyPID();
 						}
 						break;
 					case SHOOT:
@@ -141,7 +146,7 @@ public class Auto {
 						}
 						break;
 			}
-			break;
 		}
+		dt.update();
 	}
 }

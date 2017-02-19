@@ -57,7 +57,7 @@ public class Robot extends SampleRobot {
     		long time = Common.time();
     		
     		auto.auto();
-    		Common.debug("Autoning");
+//    		Common.debug("Autoning");
     		dt.update();
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;

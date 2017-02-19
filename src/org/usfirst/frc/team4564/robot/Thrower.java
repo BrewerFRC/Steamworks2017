@@ -166,10 +166,11 @@ public class Thrower {
 		public static final int READY_TO_FIRE = 3;  //Flywheel up to input speed
 		public static final int FIRE = 4;  //Flywheel feeder intakes ball at feeder rate
 		public static final int CLEAR_SHOOTER = 5;  //Stop motors, run feeder back to clear channel.
+		public static final int DEPLOY_FLIPPER = 6;  //deploy flipper with 3 seconds delay
 		
 		private Thrower thrower;
 		private int currentState;
-		public long clearTimer;
+		public long clearTimer,flipperDelay = 0;
 		
 		public ThrowerState(Thrower thrower) {
 			currentState = INIT;
@@ -242,15 +243,23 @@ public class Thrower {
 					Common.debug("CLEAR_SHOOTER: Clearing channel of balls");
 					thrower.intakeOff();
 					thrower.setSpeed(0);
-					flipper.set(1);
+					//flipper.set(1);
 					thrower.setFeederIntake(1);
 					if(Common.time() >= clearTimer) {
 						thrower.setFeederIntake(0);
-						currentState = READY;
+						flipperDelay = Common.time() + 3000;
+						currentState = DEPLOY_FLIPPER;
 					} else { 
 						currentState = CLEAR_SHOOTER;
 					}
 					break;
+				case DEPLOY_FLIPPER:
+					if(Common.time() > flipperDelay){
+						deployFlipper();
+						currentState = READY;
+					}else{
+						currentState = DEPLOY_FLIPPER;
+					}
 			}
 			return currentState;
 		}

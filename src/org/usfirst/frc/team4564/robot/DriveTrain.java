@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.Talon;
  * @author Wataru Nakata
  */
 public class DriveTrain extends RobotDrive {
-	public static final double P = 0, I = 0, D = 0;
+	public static final double P = 0.005, I = 0, D = 0;
 	
 	private static Heading heading;
 	private static final Talon FrontL = new Talon(Constants.PWM_DRIVE_FL);
@@ -45,13 +45,14 @@ public class DriveTrain extends RobotDrive {
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
 		encoder.setDistancePerPulse(109.5/17688.0);
 		drivePID = new PID(p, i, d, false, "drive");
+		drivePID.setOutputLimits(-0.7, 0.7);
+		drivePID.setMin(0.4);
 	}
 	
 	public void init()
 	{
 		encoder.reset();
 		heading.reset();
-		driveComp = ()-> true;
 	}
 	
 	public void update() {
@@ -124,6 +125,10 @@ public class DriveTrain extends RobotDrive {
     	SlideR.set(-slide);
     }
     
+    public void drivebyPID()
+    {
+    	this.setDrive(calcDrive(), -heading.turnRate(),0);
+    }
     public void driveDistance(double distance) {
     	drivePID.setTarget(encoder.getDistance() + distance);
     	driveComp = () -> Math.abs(encoder.getDistance() - drivePID.getTarget()) <= 2.0;
@@ -152,6 +157,7 @@ public class DriveTrain extends RobotDrive {
     }
     
     public double calcDrive() {
+    	//Common.debug("DT:CalcDrive");
     	return drivePID.calc(encoder.getDistance());
     }
 }
