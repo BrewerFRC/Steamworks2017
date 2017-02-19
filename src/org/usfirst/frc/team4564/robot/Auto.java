@@ -6,12 +6,14 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  * Handles the autonomous routine of the Steamworks 2017 game.
  * 
  * @author Brewer FIRST Robotics Team 4564
- * @author Evan McCoy
+ * @author Wataru Nakata
+ * @author Jacob Cote
  */
 public class Auto {
-	private static final int DRIVE_GEAR = 0, ALIGN_GEAR = 1, TRACK_GEAR = 2, DRIVE_HOPPER = 3, SLIDE_HOPPER = 4, 
-			DRIVE_BOILER = 5, PIVOT_BOILER = 6, SHOOT = 7;
+	private static final int CALC = 0, DRIVE_TO_TARGET = 1, TURN_TO_TARGET = 2, ALIGN = 3, 
+			DRIVE_HOPPER = 0, SLIDE_HOPPER = 1, DRIVE_BOILER = 2, PIVOT_BOILER = 3, SHOOT = 4;
 	private static final int LEFT = 0, CENTER = 1, RIGHT = 2;
+	private static final int ACTION_GEAR = 0, ACTION_BOILER = 1;
 	private static final int RED = 0;
 	private static final int halfRobotWidth = 36/2;
 	
@@ -24,169 +26,122 @@ public class Auto {
 	private int state; //Current auto state of the robot.
 	private long timer;
 	
-	public Auto() {
-		dt = Robot.getDriveTrain();
+	private boolean tracking;
+	private double distance;
+	private double turn;
+	
+	public Auto(DriveTrain drivetrain) {
+		dt = drivetrain;
 		autoTable = NetworkTable.getTable("auto");
 	}
 	
 	public void init() {
-		startingPosition = (int)autoTable.getNumber("startingPosition", -1);
-		alliance = (int)autoTable.getNumber("alliance", -1);
-		startingPosition = RIGHT;
+		tracking = false;
+		state = CALC;
+//		startingPosition = (int)autoTable.getNumber("startingPosition", -1);
+//		alliance = (int)autoTable.getNumber("alliance", -1);
+		startingPosition = LEFT;
 		alliance = RED;
+		action = ACTION_GEAR;
 	}
 	
 	/**
 	 * Auto update and state control method.
 	 */
 	public void auto() {
-		
-		if (action == 0) {
-			switch(startingPosition) {
-			case LEFT:
-				leftGear();
+		switch(action) {
+			case ACTION_GEAR:
+				switch(state) {
+					case CALC :
+						Common.debug("AUTO:CALC");
+						switch(startingPosition) {
+							case RIGHT:
+								if(alliance == RED) {
+									distance = 112.6 - halfRobotWidth;
+									turn = -60;
+								} else {
+									distance = 107.4 - halfRobotWidth;
+									turn = -60;
+								}
+								break;
+								
+							case LEFT:
+								if(alliance == RED) {
+									distance = 107.4 - halfRobotWidth;
+									turn = 60;
+								} else {
+									distance = 112.6 - halfRobotWidth;
+									turn = 60;
+								}
+								break;
+								
+							case CENTER:
+								distance = 0;
+								turn = 0;
+								break;
+						}
+						state = DRIVE_TO_TARGET;
+						break;
+						
+					case DRIVE_TO_TARGET:
+						Common.debug("Driving to the target" + distance);
+						dt.driveDistance(distance);
+						state = TURN_TO_TARGET;
+						break;
+						
+					case TURN_TO_TARGET:
+						if (dt.driveComplete()) {
+							dt.turnTo(turn);
+							state = ALIGN;
+						}
+						break;
+						
+					case ALIGN:
+						if (dt.driveComplete()) {
+							if (!tracking) {
+								GearVision.i.start();
+							}
+							GearVision.i.track();
+							dt.setDrive(GearVision.i.forward(),GearVision.i.turn() , GearVision.i.slide());
+						}
+						break;
+				}
 				break;
-			case CENTER: 
-				centerGear();
-				break;
-			case RIGHT: 
-				rightGear();
-				break;
+						
+			case ACTION_BOILER:
+				switch(state) {
+					case DRIVE_HOPPER:
+						dt.driveDistance(-105);
+						state = SLIDE_HOPPER;
+						break;
+					case SLIDE_HOPPER:
+						if (dt.driveComplete()) {
+							double slide = (alliance == RED) ? 1.0 : -1.0;
+							dt.setDrive(0, 0, slide);
+							timer = Common.time() + 3000;
+							state = DRIVE_BOILER;
+						}
+						break;
+					case DRIVE_BOILER:
+						if (Common.time() >= timer) {
+							dt.driveDistance(60);
+							state = PIVOT_BOILER;
+						}
+						break;
+					case PIVOT_BOILER:
+						if (dt.driveComplete()) {
+							dt.manualDrive(0.5, 0.5, 0, 0, 0, 0);
+							timer = Common.time() + 1000;
+							state = SHOOT;
+						}
+						break;
+					case SHOOT:
+						if (Common.time() >= timer) {
+							Robot.getThrower().state.fire();
+						}
+						break;
 			}
-			
-			double forward = 0;
-			double turn = 0;
-			double slide = 0;
-			if (state == TRACK_GEAR) {
-				forward = GearVision.i.forward();
-				turn = GearVision.i.turn();
-				slide = GearVision.i.slide();
-			}
-			else {
-				forward = dt.calcDrive();
-				turn = dt.getHeading().turnRate();
-			}
-			dt.setDrive(forward, turn, slide);
-		}
-		else if (action == 1) {
-			state = DRIVE_HOPPER;
-			shoot();
-		}
-	}
-	
-	/**
-	 * Controls gear alignment on the left gear platform.
-	 */
-	public void leftGear() {
-		double forwardDistance = (alliance == RED) ? 107.4 - halfRobotWidth : 112.6 - halfRobotWidth;
-		double turn = 60;
-		
-		switch (state) {
-			case DRIVE_GEAR:
-				dt.driveDistance(forwardDistance);
-				state = ALIGN_GEAR;
-				Common.debug("auto: Driving to gear line.");
-				break;
-			case ALIGN_GEAR:
-				if (dt.driveComplete()) {
-					dt.turnTo(turn);
-					state = TRACK_GEAR;
-					Common.debug("auto: Turning toward gear.");
-				}
-				break;
-			case TRACK_GEAR:
-				if (dt.driveComplete()) {
-					dt.resetDrive();
-					GearVision.i.track();
-					Common.debug("auto: Tracking gear.");
-				}
-				break;
-		}
-	}
-	
-	/**
-	 * Controls gear alignment on the center gear platform.
-	 */
-	public void centerGear() {
-		double forwardDistance = 114.3 - halfRobotWidth /*Gear vision distance*/;
-		switch (state) {
-			case DRIVE_GEAR:
-				dt.driveDistance(forwardDistance);
-				state = TRACK_GEAR;
-				Common.debug("auto: Driving to gear line.");
-				break;
-			case TRACK_GEAR:
-				if (dt.driveComplete()) {
-					dt.resetDrive();
-					GearVision.i.track();
-					Common.debug("auto: Tracking gear.");
-				}
-				break;
-		}
-	}
-	
-	/**
-	 * Controls gear alignment on the right gear platform.
-	 */
-	public void rightGear() {
-		double forwardDistance = (alliance == RED) ? 112.6 - halfRobotWidth : 107.4 - halfRobotWidth;
-		double turn = -60;
-		
-		switch (state) {
-			case DRIVE_GEAR:
-				dt.driveDistance(forwardDistance);
-				state = ALIGN_GEAR;
-				Common.debug("auto: Driving to gear line.");
-				break;
-			case ALIGN_GEAR:
-				if (dt.driveComplete()) {
-					dt.turnTo(turn);
-					state = TRACK_GEAR;
-					Common.debug("auto: Turning toward gear.");
-				}
-				break;
-			case TRACK_GEAR:
-				if (dt.driveComplete()) {
-					dt.resetDrive();
-					GearVision.i.track();
-					Common.debug("auto: Tracking gear.");
-				}
-				break;
-		}
-	}
-	
-	public void shoot() {
-		switch (state) {
-			case DRIVE_HOPPER:
-				dt.driveDistance(-105);
-				state = SLIDE_HOPPER;
-				break;
-			case SLIDE_HOPPER:
-				if (dt.driveComplete()) {
-					double slide = (alliance == RED) ? 1.0 : -1.0;
-					dt.setDrive(0, 0, slide);
-					timer = Common.time() + 3000;
-					state = DRIVE_BOILER;
-				}
-				break;
-			case DRIVE_BOILER:
-				if (Common.time() >= timer) {
-					dt.driveDistance(60);
-					state = PIVOT_BOILER;
-				}
-				break;
-			case PIVOT_BOILER:
-				if (dt.driveComplete()) {
-					dt.manualDrive(0.5, 0.5, 0, 0, 0, 0);
-					timer = Common.time() + 1000;
-					state = SHOOT;
-				}
-				break;
-			case SHOOT:
-				if (Common.time() >= timer) {
-					Robot.getThrower().state.fire();
-				}
-				break;
+			break;
 		}
 	}
 }

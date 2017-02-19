@@ -24,12 +24,12 @@ public class Thrower {
 	public static Xbox j = new Xbox(0);
 	
 	public ThrowerState state;
-	private static int flywheelRPM = 2800; //Ideal RPM target for flywheel.
-	private static final double feederRate = -0.5;  //Ideal RPM for flywheel feeder.
+	private static int flywheelRPM = 2650; //Ideal RPM target for flywheel.
+	private static  double feederRate = -0.28;  //Ideal RPM for flywheel feeder.
 	private static final double intakeRate = 1.0;
-	private static final double P = 0.000012;
-	private static final double I = 0;
-	private static final double D = 0.008;
+	private static final double P = 1.5e-5;
+	private static final double I = 5.0e-11;
+	private static final double D = 0.006;
 	
 	private boolean engaged = false;
 	
@@ -56,6 +56,7 @@ public class Thrower {
 		
 		flipper = new Servo(Constants.SERVO);
 		SmartDashboard.putNumber("Target Flywheel RPM", flywheelRPM);
+		SmartDashboard.getNumber("feederRate", feederRate);
 	}
 	
 	/**
@@ -135,7 +136,9 @@ public class Thrower {
 	 */
 	public void update() {
 		flywheelPID.update();
+		feederRate =  SmartDashboard.getNumber("feederRate", -0.28);
 		flywheelRPM = (int) SmartDashboard.getNumber("Target Flywheel RPM", flywheelRPM);
+		
 		if (engaged) {
 			double pidCalc = flywheelPID.calc(getRPM());
 			SmartDashboard.putNumber("flywheelPIDOutput", pidCalc);
@@ -145,6 +148,7 @@ public class Thrower {
 		else {
 			flywheel0.set(0);
 			flywheel1.set(0);
+			flywheelPID.reset();
 		}
 	}
 	
@@ -210,7 +214,6 @@ public class Thrower {
 		public int update() {
 			switch(currentState) {
 				case READY:
-					Common.debug("READY: Ready to begin firing process");
 					break;
 					
 				case SPIN_UP:

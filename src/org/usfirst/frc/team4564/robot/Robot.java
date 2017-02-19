@@ -35,7 +35,7 @@ public class Robot extends SampleRobot {
     	thrower = new Thrower();
     	gearVision = new GearVision();
     	climber = new Climber();
-    	auto = new Auto();
+    	auto = new Auto(dt);
     	j0 = new Xbox(0);
     	j1 = new Xbox(1);
     }
@@ -51,11 +51,13 @@ public class Robot extends SampleRobot {
      * Robot autonomous mode.
      */
     public void autonomous() {
+    	dt.init();
     	auto.init();
     	while (isEnabled() && isAutonomous()) {
     		long time = Common.time();
     		
     		auto.auto();
+    		Common.debug("Autoning");
     		dt.update();
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
@@ -67,6 +69,7 @@ public class Robot extends SampleRobot {
      * Robot teleoperated mode.
      */
     public void operatorControl() {
+    	dt.init();
     	//thrower.deployFlipper();
     	long time;
     	boolean wasFiring = false;
@@ -135,6 +138,8 @@ public class Robot extends SampleRobot {
     		if (j1.when("a") || j0.when("a")) {
     			thrower.toggleIntake();
     			thrower.setFeederIntake(.25);
+    		} else if(!wasFiring){
+    			thrower.setFeederIntake(0);
     		}
 //    		if (j.getPressed("y")) {
 //    			thrower.setIntake(-1.0);

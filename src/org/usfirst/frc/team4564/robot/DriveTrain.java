@@ -29,7 +29,7 @@ public class DriveTrain extends RobotDrive {
 	
 	private Encoder encoder;
 	private PID drivePID;
-	private Supplier<Boolean> driveComplete;
+	private Supplier<Boolean> driveComp;
 	
 	double driveSpeed = 0;
 	double turnSpeed = 0;
@@ -45,6 +45,13 @@ public class DriveTrain extends RobotDrive {
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
 		encoder.setDistancePerPulse(109.5/17688.0);
 		drivePID = new PID(p, i, d, false, "drive");
+	}
+	
+	public void init()
+	{
+		encoder.reset();
+		heading.reset();
+		driveComp = ()-> true;
 	}
 	
 	public void update() {
@@ -119,25 +126,25 @@ public class DriveTrain extends RobotDrive {
     
     public void driveDistance(double distance) {
     	drivePID.setTarget(encoder.getDistance() + distance);
-    	driveComplete = () -> Math.abs(encoder.getDistance() - drivePID.getTarget()) <= 2.0;
+    	driveComp = () -> Math.abs(encoder.getDistance() - drivePID.getTarget()) <= 2.0;
     }
     
     public void relTurn(double degrees) {
     	heading.relTurn(degrees);
-    	driveComplete = () -> Math.abs(heading.getAngle() - heading.getTargetAngle()) <= 2.0;
+    	driveComp = () -> Math.abs(heading.getAngle() - heading.getTargetAngle()) <= 2.0;
     }
     
     public void turnTo(double heading) {
     	getHeading().setHeading(heading);
-    	driveComplete = () -> Math.abs(getHeading().getAngle() - getHeading().getTargetAngle()) <= 2.0;
+    	driveComp = () -> Math.abs(getHeading().getAngle() - getHeading().getTargetAngle()) <= 2.0;
     }
     
     public void resetDrive() {
-    	driveComplete = () -> true;
+    	driveComp = () -> true;
     }
     
     public boolean driveComplete() {
-    	return driveComplete.get();
+    	return driveComp.get();
     }
     
     public Heading getHeading() {
