@@ -147,6 +147,11 @@ public class Robot extends SampleRobot {
 //    			//thrower.intakeOff();
 //    		}
 //    		
+    		if(j0.getBumper(GenericHID.Hand.kLeft) ||j1.getBumper(GenericHID.Hand.kLeft)){
+    			thrower.retractFlipper();
+    		}else if(!wasFiring){
+    			thrower.deployFlipper();
+    		}
     		
     		if (j1.getPressed("b") || j0.getPressed("b")) {
     			wasFiring = true;
@@ -175,12 +180,17 @@ public class Robot extends SampleRobot {
     	while (isEnabled() && isTest()) {
     		long time = Common.time();
     		if (j0.when("x"))
-        		dt.driveDistance(10);
-    		if(j0.when("y"))
+        		dt.driveDistance(50);
+    		if(j0.when("y")) {
     			dt.relTurn(45);
-    		//    		Common.debug("Autoning");
+    			Common.debug("Y button pressed");
+    		}
+    		dt.driveComplete();
     		dt.drivebyPID();
     		dt.update();
+    		SmartDashboard.putNumber("heading", dt.getHeading().getHeading());
+    		SmartDashboard.putNumber("TargetAngle", dt.getHeading().getTargetHeading());
+    		//Common.debug("heading"+dt.getHeading().getHeading());
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
      	    Timer.delay((delay > 0) ? delay : 0.001);
     	}

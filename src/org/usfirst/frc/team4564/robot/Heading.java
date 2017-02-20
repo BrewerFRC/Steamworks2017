@@ -3,9 +3,9 @@ package org.usfirst.frc.team4564.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 
 public class Heading {
-	public static final double P = 0.185;
-	public static final double I = 0.00005;
-	public static final double D = 0.1;//250.0;
+	public static final double P = 0.05;
+	public static final double I = 0.0000005;
+	public static final double D = 0.2;//250.0;
 	
 	private ADXRS450_Gyro gyro;
 	//PID takes cumulative angles

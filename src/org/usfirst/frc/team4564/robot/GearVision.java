@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  */
 public class GearVision {
 	public static GearVision i;
-	public static final int MIN_ALIGN_DISTANCE = 40;
+	public static final int MIN_ALIGN_DISTANCE = 35;
 	public static final int MAX_ALIGN_DISTANCE = 150;
 	
 	private Solenoid ringLight;
@@ -89,8 +89,8 @@ public class GearVision {
 		}
 		if (reached) {
 			if(slide == 0 || aligned) {
-				if (bat.getDistance() < 15){
-					if(bat.getDistance() <13){
+				if (bat.getDistance() < 13){
+					if(bat.getDistance() <10){
 						forward = 0.58;
 					}else{
 						forward = 0;
@@ -115,7 +115,7 @@ public class GearVision {
 			}
 			forwardPower = .58;
 			//Adjust heading target based on turn.
-			if((distance > 60) && distance != 704) {
+			if((distance > 40) && distance != 704) {
 				Robot.getDriveTrain().getHeading().incrementTargetAngle(-rawTurn);
 			}
 			

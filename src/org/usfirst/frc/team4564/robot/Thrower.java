@@ -24,7 +24,7 @@ public class Thrower {
 	public static Xbox j = new Xbox(0);
 	
 	public ThrowerState state;
-	private static int flywheelRPM = 2650; //Ideal RPM target for flywheel.
+	private static int flywheelRPM = 2900; //Ideal RPM target for flywheel.
 	private static  double feederRate = -0.28;  //Ideal RPM for flywheel feeder.
 	private static final double intakeRate = 1.0;
 	private static final double P = 1.5e-5;
@@ -67,10 +67,14 @@ public class Thrower {
 	public double getRPM() {
 		return flywheel1.getEncVelocity()/10240.0*1500;
 	}
-	public void deployFlipper()
-	{
+	public void deployFlipper() {
 		flipper.set(1);
 	}
+	
+	public void retractFlipper() {
+		flipper.set(-1);
+	}
+	
 	/**
 	 * Whether or not the flywheel is spun up and ready to shoot.
 	 * 
@@ -169,7 +173,7 @@ public class Thrower {
 		public static final int DEPLOY_FLIPPER = 6;  //deploy flipper with 3 seconds delay
 		
 		private Thrower thrower;
-		private int currentState;
+		public int currentState;
 		public long clearTimer,flipperDelay = 0;
 		
 		public ThrowerState(Thrower thrower) {
@@ -249,16 +253,12 @@ public class Thrower {
 						thrower.setFeederIntake(0);
 						flipperDelay = Common.time() + 3000;
 						currentState = DEPLOY_FLIPPER;
-					} else { 
-						currentState = CLEAR_SHOOTER;
-					}
+					} 
 					break;
 				case DEPLOY_FLIPPER:
 					if(Common.time() > flipperDelay){
 						deployFlipper();
 						currentState = READY;
-					}else{
-						currentState = DEPLOY_FLIPPER;
 					}
 			}
 			return currentState;

@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.Talon;
  * @author Wataru Nakata
  */
 public class DriveTrain extends RobotDrive {
-	public static final double P = 0.05, I = 0, D = 0;
+	public static final double P = 0.02, I = 0, D = 0;
 	
 	private static Heading heading;
 	private static final Talon FrontL = new Talon(Constants.PWM_DRIVE_FL);
@@ -29,7 +29,9 @@ public class DriveTrain extends RobotDrive {
 	
 	private Encoder encoder;
 	private PID drivePID;
-	private Supplier<Boolean> driveComp;
+	private Supplier<Boolean> driveComp = ()-> true;
+	private boolean turning;
+	private int compCount = 0;
 	
 	double driveSpeed = 0;
 	double turnSpeed = 0;
@@ -60,6 +62,8 @@ public class DriveTrain extends RobotDrive {
 		drivePID.update();
 		SmartDashboard.putNumber("encoderDist", encoder.getDistance());
 		SmartDashboard.putNumber("encoderCount", encoder.get());
+		SmartDashboard.putBoolean("Turning", turning);
+
 	}
 	
 	//target = target speed (desired speed), driveSpeed = current speed
@@ -128,7 +132,15 @@ public class DriveTrain extends RobotDrive {
     
     public void drivebyPID()
     {
-    	this.setDrive(calcDrive(), -heading.turnRate(),0);
+    	double outputDrive = calcDrive(),outputTurn = -heading.turnRate();
+    	SmartDashboard.putNumber("drivePIDOUT", outputDrive);
+    	SmartDashboard.putNumber("TurnPIDOUT ", outputTurn);
+    	if(turning){
+    		drivePID.setTarget(encoder.getDistance());
+    		outputDrive = 0;
+    	}
+    	
+    	this.setDrive(outputDrive, outputTurn,0);
     }
     public void driveDistance(double distance) {
     	drivePID.setTarget(encoder.getDistance() + distance);
@@ -136,21 +148,38 @@ public class DriveTrain extends RobotDrive {
     }
     
     public void relTurn(double degrees) {
+    	Common.debug("relturnCalled");
     	heading.relTurn(degrees);
-    	driveComp = () -> Math.abs(heading.getAngle() - heading.getTargetAngle()) <= 2.0;
+    	driveComp = () -> {
+    		boolean complete = Math.abs(heading.getAngle() - heading.getTargetAngle()) <= 2.0;
+    		if (complete) {
+    			turning = false;
+    		}
+    		return complete;
+    	};
+    	turning = true;
     }
     
     public void turnTo(double heading) {
     	getHeading().setHeading(heading);
-    	driveComp = () -> Math.abs(getHeading().getAngle() - getHeading().getTargetAngle()) <= 2.0;
+    	driveComp = () -> {
+    		boolean complete = Math.abs(getHeading().getAngle() - getHeading().getTargetAngle()) <= 2.0;
+    		if (complete) {
+    			turning = false;
+    		}
+    		return complete;
+    	};
+    	turning = true;
     }
-    
     public void resetDrive() {
     	driveComp = () -> true;
     }
     
     public boolean driveComplete() {
-    	return driveComp.get();
+    	if(compCount == 5)
+    		compCount = 0;
+    	compCount += (driveComp.get()) ? 1 : 0;
+      	return compCount == 5;
     }
     
     public Heading getHeading() {
