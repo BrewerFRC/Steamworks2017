@@ -137,8 +137,15 @@ public class Robot extends SampleRobot {
     		//Thrower
     		if (j1.when("a") || j0.when("a")) {
     			thrower.toggleIntake();
-    			thrower.setFeederIntake(.25);
-    		} else if(!wasFiring){
+    			thrower.setFeederIntake(0.25);
+    		}
+    		else if (j1.getPressed("y") || j0.getPressed("y")) {
+    			thrower.intakeBackward();
+    		}
+    		else if (!j1.getPressed("y") && !j0.getPressed("y")) {
+    			thrower.ignoreState = false;
+    		}
+    		else if(!wasFiring) {
     			thrower.setFeederIntake(0);
     		}
 //    		if (j.getPressed("y")) {

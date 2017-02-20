@@ -32,6 +32,8 @@ public class Thrower {
 	private static final double D = 0.006;
 	
 	private boolean engaged = false;
+	private int intakeState; //-1 backward, 0 off, 1 forward
+	public boolean ignoreState;
 	
 	/**
 	 * Instantiates a new Thrower subsystem with the defined PID values.
@@ -110,16 +112,28 @@ public class Thrower {
 		intake.set(speed);
 	}
 	
+	/**
+	 * Turns on intake.
+	 */
 	public void intakeOn() {
-		intake.set(intakeRate);
+		intakeState = 1;
 		Common.debug("Turing On Intake");
+	}
+	
+	/**
+	 * Turns intake backward.
+	 */
+	public void intakeBackward() {
+		ignoreState = true;
+		intake.set(-1);
+		feeder.set(0.28);
 	}
 	
 	/**
 	 * Shuts off the external intake.
 	 */
 	public void intakeOff() {
-		intake.set(0);
+		intakeState = 0;
 		Common.debug("Turing Off Intake");
 	}
 	
@@ -142,6 +156,11 @@ public class Thrower {
 		flywheelPID.update();
 		feederRate =  SmartDashboard.getNumber("feederRate", -0.28);
 		flywheelRPM = (int) SmartDashboard.getNumber("Target Flywheel RPM", flywheelRPM);
+		
+		if (!ignoreState) {
+			intake.set(intakeState * intakeRate);
+			feeder.set(intakeState * feederRate);
+		}
 		
 		if (engaged) {
 			double pidCalc = flywheelPID.calc(getRPM());
