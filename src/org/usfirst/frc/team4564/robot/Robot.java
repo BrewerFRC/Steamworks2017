@@ -242,6 +242,7 @@ public class Robot extends SampleRobot {
 		j0.setRumble(RumbleType.kRightRumble, 0);
 		j1.setRumble(RumbleType.kLeftRumble, 0);
 		j1.setRumble(RumbleType.kRightRumble, 0);
+		thrower.state.stopFiring();
     }
     
     /**

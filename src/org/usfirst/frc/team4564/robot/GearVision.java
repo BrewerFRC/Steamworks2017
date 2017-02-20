@@ -22,6 +22,7 @@ public class GearVision {
 	
 	private boolean reached;
 	private boolean aligned;
+	public boolean  complete;
 	
 	private double forward;
 	private double turn;
@@ -41,6 +42,7 @@ public class GearVision {
 	
 	public void start() {
 		Common.debug("start called");
+		complete = false;
 		reset();
 		Robot.getDriveTrain().getHeading().setHeadingHold(true);
 		ringLight.set(true);
@@ -90,6 +92,7 @@ public class GearVision {
 		if (reached) {
 			if(slide == 0 || aligned) {
 				if (bat.getDistance() < 13){
+					complete = true;
 					if(bat.getDistance() <10){
 						forward = 0.58;
 					}else{

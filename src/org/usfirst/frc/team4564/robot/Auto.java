@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  * @author Jacob Cote
  */
 public class Auto {
-	private static final int DRIVE_TO_GEAR = 0, TURN_TO_GEAR = 1, ALIGN = 2,GEAR_VISION = 3, 
-			DRIVE_HOPPER = 4, SLIDE_HOPPER = 5,SLIDE_STOP=6, DRIVE_BOILER = 7, PIVOT_BOILER = 8, SHOOT = 9;
+	private static final int DRIVE_TO_GEAR = 0, TURN_TO_GEAR = 1, ALIGN = 2,GEAR_VISION = 3, BACKUP = 4,FIRST_TURN = 5,SLIDE_OFF = 6,DRIVE_FORWARD =7,STOP = 8,
+			DRIVE_HOPPER = 9, SLIDE_HOPPER = 10,SLIDE_STOP = 11,SLIDE_AWAY=12, DRIVE_BOILER = 13, PIVOT_BOILER = 14,SPIN_UP =15,SMASH = 16, SHOOT = 17;
 	private static final int LEFT = 0, CENTER = 1, RIGHT = 2;
 	private static final int ACTION_GEAR = 0, ACTION_BOILER = 1;
 	private static final int RED = 0, BLUE = 1;
@@ -28,6 +28,7 @@ public class Auto {
 	
 	private double distance;
 	private double turn;
+	private double slideOff;
 	
 	public Auto(DriveTrain drivetrain) {
 		dt = drivetrain;
@@ -35,41 +36,47 @@ public class Auto {
 	}
 	
 	public void init() {
-		state = DRIVE_HOPPER;
 		dt.getHeading().setHeadingHold(true);
 //		startingPosition = (int)autoTable.getNumber("startingPosition", -1);
 //		alliance = (int)autoTable.getNumber("alliance", -1);
 //		action = (int)autoTable.getNumber("action", -1);
-		startingPosition = LEFT;
-		alliance = BLUE;
-		action = ACTION_BOILER;
+		startingPosition = CENTER;
+		alliance = RED;
+		action = ACTION_GEAR;
+		slideOff = 1;
 		
 		Common.debug("AUTO:CALC");
+		if (action == ACTION_GEAR) {
+			state = DRIVE_TO_GEAR;
+		}
+		else {
+			state = DRIVE_HOPPER;
+		}
 		
 		switch(startingPosition) {
 		
 			case RIGHT:
 				if(alliance == RED) {
-					distance = 89.5 - halfRobotWidth;
+					distance = 89.5 - halfRobotWidth - 10;
 					turn = -60;
 				} else {
-					distance = 93.8 - halfRobotWidth;
+					distance = 93.8 - halfRobotWidth-8;
 					turn = -60;
 				}
 				break;
 				
 			case LEFT:
 				if(alliance == RED) {
-					distance = 93.8 - halfRobotWidth-4;
+					distance = 93.8 - halfRobotWidth-8;
 					turn = 60;
 				} else {
-					distance = 89.5 - halfRobotWidth;
+					distance = 89.5 - halfRobotWidth-10;
 					turn = 60;
 				}
 				break;
 				
 			case CENTER:
-				distance = 0;
+				distance = 30;
 				turn = 0;
 				break;
 				
@@ -103,7 +110,7 @@ public class Auto {
 				dt.drivebyPID();
 				if (dt.driveComplete()) {
 					Common.debug("AUTO:turningToTarget :"+turn);
-					dt.turnTo(turn);
+					dt.relTurn(turn);
 					state = ALIGN;
 				}
 				break;
@@ -114,18 +121,67 @@ public class Auto {
 					Common.debug("AUTO:GearTrackingStarted");
 					GearVision.i.start();
 					state = GEAR_VISION;
+					timer = Common.time()+5000;
 				}
 				break;
 			case GEAR_VISION:
-				GearVision.i.track();
-				dt.setDrive(GearVision.i.forward(),GearVision.i.turn() , GearVision.i.slide());
+				if(Common.time() >= timer && GearVision.i.complete){
+					state = BACKUP;
+				}else{
+					GearVision.i.track();
+					dt.setDrive(GearVision.i.forward(),GearVision.i.turn() , GearVision.i.slide());
+				}
+				break;
+			
+			case BACKUP:
+				dt.driveDistance(-30);
+				state = FIRST_TURN;
+				break;
+			case FIRST_TURN:
+				if (dt.driveComplete()) {
+					if(startingPosition == CENTER){
+						timer = Common.time() + 1500;
+					}else {
+						dt.relTurn(-turn);
+					}
+					state = SLIDE_OFF;
+				}else { 
+					dt.drivebyPID();
+				}
+				break;
+			case SLIDE_OFF:
+				if(startingPosition == CENTER) {
+					if(timer <= Common.time()){
+						state = DRIVE_FORWARD;
+					}else{
+						dt.setDrive(0, -dt.getHeading().turnRate(), slideOff);
+					}
+				}else{
+					state = DRIVE_FORWARD;
+				}
+				break;
+				
+			case DRIVE_FORWARD:
+				if (startingPosition == CENTER){
+					dt.driveDistance(240);
+					state = STOP;
+				}else
+				if(dt.driveComplete()){
+					dt.driveDistance(240);
+					state = STOP;
+				}else{
+					dt.drivebyPID();
+				}
+				break;
+			case STOP:
+				dt.drivebyPID();
 				break;
 		}
 	}
 	private void shootAction(){
 		switch(state) {
 			case DRIVE_HOPPER:
-				dt.driveDistance(-105 + 12 + halfRobotWidth);
+				dt.driveDistance(-105 + 7 + halfRobotWidth);
 				Robot.getThrower().retractFlipper();
 				state = SLIDE_HOPPER;
 				break;
@@ -138,17 +194,25 @@ public class Auto {
 				}
 				break;
 			case SLIDE_STOP:
-				double slide = (alliance == RED) ? 1.0 : -1.0;
+				double slide = (alliance == RED) ? -1.0 : 1.0;
 				dt.setDrive(0, -dt.getHeading().turnRate(), slide);
+				if (Common.time() >= timer) {
+					timer = Common.time()+1500;
+					state = SLIDE_AWAY;
+				}
+				break;
+			case SLIDE_AWAY:
+				dt.setDrive(0, -dt.getHeading().turnRate(), 0);
 				if (Common.time() >= timer) {
 					timer = Common.time()+1500;
 					state = DRIVE_BOILER;
 				}
 				break;
 			case DRIVE_BOILER:
-				dt.setDrive(0, -dt.getHeading().turnRate(), ((alliance==RED) ? -0.5:0.5));
+				dt.setDrive(0, -dt.getHeading().turnRate(), ((alliance==RED) ? 0.5:-0.5));
 				if(Common.time() >= timer) {
-					dt.driveDistance(60+5);
+					Robot.getThrower().intakeOn();
+					dt.driveDistance(60+10);
 					state = PIVOT_BOILER;
 				}
 				break;
@@ -156,26 +220,36 @@ public class Auto {
 			case PIVOT_BOILER:
 				if (dt.driveComplete()) {
 					if(alliance == RED)
-						dt.turnTo(45);
-					else
 						dt.turnTo(-45);
-					state = SHOOT;
-					timer = Common.time() + 2000;
+					else
+						dt.turnTo(45);
+					state = SPIN_UP;
 				}else{
 					dt.drivebyPID();
 				}
 				break;
-			case SHOOT:
+			case SPIN_UP:
 				Common.debug("AUTO:CASE SHOOT");
-				if (timer <= Common.time()) {
+				if (dt.driveComplete() ) {
 					Common.debug("AUTO: fireing");
-					dt.setDrive(-0.70,-dt.getHeading().turnRate(),0);
-					Robot.getThrower().state.fire();
+					state = SHOOT;
 				}else{
 					Common.debug("AUTO: drivingByPID");
 					dt.drivebyPID();
 				}
 				break;
+			case SMASH:
+				timer = Common.time()+250;
+				state = SHOOT;
+				break;
+			case SHOOT:
+				dt.setDrive(-0.70,-dt.getHeading().turnRate(),0);
+
+				if(Common.time() >= timer){
+					Robot.getThrower().state.fire();
+				}
+				break;
+				
 		}
 	}
 }

@@ -47,7 +47,7 @@ public class DriveTrain extends RobotDrive {
 		heading = new Heading(Heading.P, Heading.I, Heading.D);
 		encoder.setDistancePerPulse(109.5/17688.0);
 		drivePID = new PID(p, i, d, false, "drive");
-		drivePID.setOutputLimits(-0.7, 0.7);
+		drivePID.setOutputLimits(-0.8, 0.8);
 		drivePID.setMin(0.4);
 	}
 	
@@ -176,10 +176,12 @@ public class DriveTrain extends RobotDrive {
     }
     
     public boolean driveComplete() {
-    	if(compCount == 5)
+    	if(compCount == 3){
     		compCount = 0;
+    	}
     	compCount += (driveComp.get()) ? 1 : 0;
-      	return compCount == 5;
+    	Common.debug("DT:driveCompleteCount increased" + compCount);
+      	return compCount == 3;
     }
     
     public Heading getHeading() {
