@@ -85,6 +85,7 @@ public class Auto {
 		} else if(action == ACTION_BOILER) {
 			shootAction();
 			Robot.getThrower().state.update();
+			Robot.getThrower().update();
 		}
 		dt.update();
 	}
