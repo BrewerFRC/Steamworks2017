@@ -137,12 +137,16 @@ public class Robot extends SampleRobot {
     		//Thrower
     		if (j1.when("a") || j0.when("a")) {
     			thrower.toggleIntake();
+    			thrower.setFeederIntake(0.25);
     		}
     		else if (j1.getPressed("y") || j0.getPressed("y")) {
     			thrower.intakeBackward();
     		}
-    		else if (!j1.getPressed("y") && !j0.getPressed("y") && (thrower.intakeState != 1)) {
-    			thrower.intakeOff();
+    		else if (!j1.getPressed("y") && !j0.getPressed("y")) {
+    			thrower.ignoreState = false;
+    		}
+    		else if(!wasFiring) {
+    			thrower.setFeederIntake(0);
     		}
 //    		if (j.getPressed("y")) {
 //    			thrower.setIntake(-1.0);
@@ -152,8 +156,10 @@ public class Robot extends SampleRobot {
 //    		
     		if(j0.getBumper(GenericHID.Hand.kLeft) ||j1.getBumper(GenericHID.Hand.kLeft)){
     			thrower.retractFlipper();
+    		}else if(!wasFiring){
+    			thrower.deployFlipper();
     		}
-    	
+    		
     		if (j1.getPressed("b") || j0.getPressed("b")) {
     			wasFiring = true;
     			thrower.state.fire();
