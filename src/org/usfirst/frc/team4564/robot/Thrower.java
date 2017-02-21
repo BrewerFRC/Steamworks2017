@@ -11,9 +11,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Handles the functions and state of the thrower subsystem.
  * 
  * @author Brewer FIRST Robotics Team 4564
- * @author Evan McCoy
+ * @author Evan McCoy -- person who takes all the responsibilities.
  * @author Jacob Cote
- * @author Wataru Nakata
  */
 public class Thrower {
 	private CANTalon flywheel0, flywheel1;
@@ -32,8 +31,8 @@ public class Thrower {
 	private static final double D = 0.006;
 	
 	private boolean engaged = false;
-	private int intakeState; //-1 backward, 0 off, 1 forward
-	public boolean ignoreState;
+	public int intakeState; //-1 puke, 0 off, 1 intake
+	public boolean shooting;
 	
 	/**
 	 * Instantiates a new Thrower subsystem with the defined PID values.
@@ -117,16 +116,13 @@ public class Thrower {
 	 */
 	public void intakeOn() {
 		intakeState = 1;
-		Common.debug("Turing On Intake");
 	}
 	
 	/**
 	 * Turns intake backward.
 	 */
 	public void intakeBackward() {
-		ignoreState = true;
-		intake.set(-1);
-		feeder.set(0.28);
+		intakeState = -1;
 	}
 	
 	/**
@@ -134,7 +130,6 @@ public class Thrower {
 	 */
 	public void intakeOff() {
 		intakeState = 0;
-		Common.debug("Turing Off Intake");
 	}
 	
 	/**
@@ -157,9 +152,9 @@ public class Thrower {
 		feederRate =  SmartDashboard.getNumber("feederRate", -0.28);
 		flywheelRPM = (int) SmartDashboard.getNumber("Target Flywheel RPM", flywheelRPM);
 		
-		if (!ignoreState) {
-			intake.set(intakeState * intakeRate);
-			feeder.set(intakeState * feederRate);
+		intake.set(intakeState * intakeRate);
+		if (!shooting) {
+			feeder.set(-intakeState * feederRate);
 		}
 		
 		if (engaged) {
@@ -195,15 +190,19 @@ public class Thrower {
 		public int currentState;
 		public long clearTimer,flipperDelay = 0;
 		
+		public boolean fire = false;
+		
 		public ThrowerState(Thrower thrower) {
 			currentState = INIT;
 			this.thrower = thrower;
 		}
+		
 
 		/**
 		 * Sets the thrower to firing state if prepared, otherwise the thrower continues to spin up.
 		 */
 		public void fire() {
+			fire = true;
 			flipper.set(-1);
 			Common.debug("Fire Order Issued: Checking flywheel is ready.");
 			if(currentState == READY_TO_FIRE) {
@@ -244,7 +243,7 @@ public class Thrower {
 					Common.debug("SPIN_UP: Spinning up flywheel");
 					thrower.setSpeed(flywheelRPM);
 					thrower.intakeOn();
-					if(thrower.ready()) {
+					if(thrower.ready() && fire) {
 						currentState = READY_TO_FIRE;
 					} else {
 						currentState = SPIN_UP;
@@ -258,11 +257,13 @@ public class Thrower {
 					
 				case FIRE:
 					Common.debug("FIRE: Activating flywheel feeder, firing ball");
+					thrower.shooting = true;
 					thrower.setFeederIntake(feederRate);
 					clearTimer = Common.time() + 500;
 		
 					break;
 				case CLEAR_SHOOTER:
+					fire =false;
 					Common.debug("CLEAR_SHOOTER: Clearing channel of balls");
 					thrower.intakeOff();
 					thrower.setSpeed(0);
@@ -272,6 +273,7 @@ public class Thrower {
 						thrower.setFeederIntake(0);
 						flipperDelay = Common.time() + 3000;
 						currentState = DEPLOY_FLIPPER;
+						thrower.shooting = false;
 					} 
 					break;
 				case DEPLOY_FLIPPER:
