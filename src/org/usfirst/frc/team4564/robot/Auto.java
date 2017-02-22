@@ -12,10 +12,19 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 public class Auto {
 	private static final int DRIVE_TO_GEAR = 0, TURN_TO_GEAR = 1, ALIGN = 2,GEAR_VISION = 3, BACKUP = 4,FIRST_TURN = 5,SLIDE_OFF = 6,DRIVE_FORWARD =7,STOP = 8,
 			DRIVE_HOPPER = 9, SLIDE_HOPPER = 10,SLIDE_STOP = 11,SLIDE_AWAY=12, DRIVE_BOILER = 13, PIVOT_BOILER = 14,SPIN_UP =15,SMASH = 16, SHOOT = 17;
-	private static final int LEFT = 0, CENTER = 1, RIGHT = 2;
+	private static final int LEFT = 1, CENTER = 2, RIGHT = 3;
 	private static final int ACTION_GEAR = 0, ACTION_BOILER = 1;
 	private static final int RED = 0, BLUE = 1;
 	private static final int halfRobotWidth = 36/2;
+	
+	private static final double WALL_TO_RIGHT_GEAR_RED = 89.5;
+	private static final double WALL_TO_RIGHT_GEAR_BLUE = 93.8;
+	private static final double WALL_TO_LEFT_GEAR_RED = 93.8;
+	private static final double WALL_TO_LEFT_GEAR_BLUE = 89.5;
+	private static final double WALL_TO_BASELINE = 114.3;
+	private static final double WALL_TO_LAUNCHPAD_LINE = 184.8;
+	private static final double FIELD_LENGTH = 652;
+	private static final double FIELD_WIDTH = 324;
 	
 	private static DriveTrain dt;
 	private static NetworkTable autoTable;
@@ -29,6 +38,8 @@ public class Auto {
 	private double distance;
 	private double turn;
 	private double slideOff;
+	private boolean wasComplete;
+	private boolean sprint;
 	
 	public Auto(DriveTrain drivetrain) {
 		dt = drivetrain;
@@ -37,12 +48,13 @@ public class Auto {
 	
 	public void init() {
 		dt.getHeading().setHeadingHold(true);
-//		startingPosition = (int)autoTable.getNumber("startingPosition", -1);
-//		alliance = (int)autoTable.getNumber("alliance", -1);
-//		action = (int)autoTable.getNumber("action", -1);
-		startingPosition = CENTER;
-		alliance = RED;
-		action = ACTION_GEAR;
+		startingPosition = (int)autoTable.getNumber("startingPosition", -1);
+		alliance = (int)autoTable.getNumber("alliance", -1);
+		action = (int)autoTable.getNumber("action", -1);
+		sprint = autoTable.getBoolean("sprint",true);
+//		startingPosition = CENTER;
+//		alliance = RED;
+//		action = ACTION_GEAR;
 		slideOff = 1;
 		
 		Common.debug("AUTO:CALC");
@@ -57,20 +69,20 @@ public class Auto {
 		
 			case RIGHT:
 				if(alliance == RED) {
-					distance = 89.5 - halfRobotWidth - 10;
+					distance = WALL_TO_RIGHT_GEAR_RED - halfRobotWidth - 10;
 					turn = -60;
 				} else {
-					distance = 93.8 - halfRobotWidth-8;
+					distance = WALL_TO_RIGHT_GEAR_BLUE - halfRobotWidth-8;
 					turn = -60;
 				}
 				break;
 				
 			case LEFT:
 				if(alliance == RED) {
-					distance = 93.8 - halfRobotWidth-8;
+					distance = WALL_TO_LEFT_GEAR_RED - halfRobotWidth-8;
 					turn = 60;
 				} else {
-					distance = 89.5 - halfRobotWidth-10;
+					distance = WALL_TO_LEFT_GEAR_BLUE - halfRobotWidth-10;
 					turn = 60;
 				}
 				break;
@@ -93,6 +105,7 @@ public class Auto {
 			shootAction();
 			Robot.getThrower().state.update();
 			Robot.getThrower().update();
+			Robot.getThrower().retractFlipper();
 		}
 		dt.update();
 	}
@@ -121,11 +134,14 @@ public class Auto {
 					Common.debug("AUTO:GearTrackingStarted");
 					GearVision.i.start();
 					state = GEAR_VISION;
-					timer = Common.time()+5000;
 				}
 				break;
 			case GEAR_VISION:
-				if(Common.time() >= timer && GearVision.i.complete){
+				if(GearVision.i.complete && !wasComplete){
+					 timer = Common.time()+5000;
+					 wasComplete = true;
+				}
+				if(Common.time() >= timer && wasComplete == true && sprint){
 					state = BACKUP;
 				}else{
 					GearVision.i.track();
@@ -181,7 +197,7 @@ public class Auto {
 	private void shootAction(){
 		switch(state) {
 			case DRIVE_HOPPER:
-				dt.driveDistance(-105 + 7 + halfRobotWidth);
+				dt.driveDistance(-105 + 7+7 + halfRobotWidth);
 				Robot.getThrower().retractFlipper();
 				state = SLIDE_HOPPER;
 				break;
@@ -212,7 +228,7 @@ public class Auto {
 				dt.setDrive(0, -dt.getHeading().turnRate(), ((alliance==RED) ? 0.5:-0.5));
 				if(Common.time() >= timer) {
 					Robot.getThrower().intakeOn();
-					dt.driveDistance(60+10);
+					dt.driveDistance(60+10-7);
 					state = PIVOT_BOILER;
 				}
 				break;
@@ -223,6 +239,8 @@ public class Auto {
 						dt.turnTo(-45);
 					else
 						dt.turnTo(45);
+					
+					Robot.getThrower().state.spinUp();
 					state = SPIN_UP;
 				}else{
 					dt.drivebyPID();

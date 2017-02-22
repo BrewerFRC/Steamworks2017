@@ -137,16 +137,12 @@ public class Robot extends SampleRobot {
     		//Thrower
     		if (j1.when("a") || j0.when("a")) {
     			thrower.toggleIntake();
-    			thrower.setFeederIntake(0.25);
     		}
     		else if (j1.getPressed("y") || j0.getPressed("y")) {
     			thrower.intakeBackward();
     		}
-    		else if (!j1.getPressed("y") && !j0.getPressed("y")) {
-    			thrower.ignoreState = false;
-    		}
-    		else if(!wasFiring) {
-    			thrower.setFeederIntake(0);
+    		else if (!j1.getPressed("y") && !j0.getPressed("y") && (thrower.intakeState != 1)) {
+    			 thrower.intakeOff();
     		}
 //    		if (j.getPressed("y")) {
 //    			thrower.setIntake(-1.0);
@@ -154,9 +150,9 @@ public class Robot extends SampleRobot {
 //    			//thrower.intakeOff();
 //    		}
 //    		
-    		if(j0.getBumper(GenericHID.Hand.kLeft) ||j1.getBumper(GenericHID.Hand.kLeft)){
+    		if (j0.getBumper(GenericHID.Hand.kLeft) ||j1.getBumper(GenericHID.Hand.kLeft)){
     			thrower.retractFlipper();
-    		}else if(!wasFiring){
+    		}else if(thrower.state.flipperCheck) {
     			thrower.deployFlipper();
     		}
     		
@@ -192,8 +188,16 @@ public class Robot extends SampleRobot {
     			dt.relTurn(45);
     			Common.debug("Y button pressed");
     		}
+    		if(j0.when("dPadUp"))
+    			dt.relTurn(60);
+    		if(j0.getPressed("a"))
+    			dt.setDrive(0, -dt.getHeading().turnRate(), 1.0);
+    		else if(j0.getPressed("b"))
+    			dt.setDrive(0, -dt.getHeading().turnRate(), -1.0);
+    		else 
+    			dt.setDrive(0, -dt.getHeading().turnRate(), 0);
     		dt.driveComplete();
-    		dt.drivebyPID();
+    		//dt.drivebyPID();
     		dt.update();
     		SmartDashboard.putNumber("heading", dt.getHeading().getHeading());
     		SmartDashboard.putNumber("TargetAngle", dt.getHeading().getTargetHeading());
