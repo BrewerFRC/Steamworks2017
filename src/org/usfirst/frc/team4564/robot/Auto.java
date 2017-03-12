@@ -26,6 +26,8 @@ public class Auto {
 	private static final double FIELD_LENGTH = 652;
 	private static final double FIELD_WIDTH = 324;
 	
+	private static final int POST_LEFT = -1, POST_STOP = 0 ,POST_RIGHT = 1;
+	
 	private static DriveTrain dt;
 	private static NetworkTable autoTable;
 
@@ -37,9 +39,8 @@ public class Auto {
 	
 	private double distance;
 	private double turn;
-	private double slideOff;
 	private boolean wasComplete;
-	private boolean sprint;
+	private int sprint;
 	
 	public Auto(DriveTrain drivetrain) {
 		dt = drivetrain;
@@ -47,15 +48,15 @@ public class Auto {
 	}
 	
 	public void init() {
+		wasComplete = false;
 		dt.getHeading().setHeadingHold(true);
 		startingPosition = (int)autoTable.getNumber("startingPosition", -1);
 		alliance = (int)autoTable.getNumber("alliance", -1);
 		action = (int)autoTable.getNumber("action", -1);
-		sprint = autoTable.getBoolean("sprint",true);
+		sprint = (int)autoTable.getNumber("postAction", POST_STOP);
 //		startingPosition = CENTER;
 //		alliance = RED;
 //		action = ACTION_GEAR;
-		slideOff = 1;
 		
 		Common.debug("AUTO:CALC");
 		if (action == ACTION_GEAR) {
@@ -138,10 +139,12 @@ public class Auto {
 				break;
 			case GEAR_VISION:
 				if(GearVision.i.complete && !wasComplete){
-					 timer = Common.time()+5000;
+					 timer = Common.time()+3000;
 					 wasComplete = true;
+					 Common.debug("AUTO:gearvision Complete");
 				}
-				if(Common.time() >= timer && wasComplete == true && sprint){
+				if(Common.time() >= timer && wasComplete == true && ((sprint != POST_STOP)|| startingPosition != CENTER)){
+					Common.debug("AUTO:backUp");
 					state = BACKUP;
 				}else{
 					GearVision.i.track();
@@ -155,11 +158,13 @@ public class Auto {
 				break;
 			case FIRST_TURN:
 				if (dt.driveComplete()) {
+					Common.debug("AUTO:firstTurn");
 					if(startingPosition == CENTER){
 						timer = Common.time() + 1500;
 					}else {
 						dt.relTurn(-turn);
 					}
+					Common.debug("AUTO:slide_off");
 					state = SLIDE_OFF;
 				}else { 
 					dt.drivebyPID();
@@ -169,11 +174,13 @@ public class Auto {
 				if(startingPosition == CENTER) {
 					if(timer <= Common.time()){
 						state = DRIVE_FORWARD;
+						Common.debug("AUTO:DrivingForward");
 					}else{
-						dt.setDrive(0, -dt.getHeading().turnRate(), slideOff);
+						dt.setDrive(0, -dt.getHeading().turnRate(), sprint);
 					}
 				}else{
 					state = DRIVE_FORWARD;
+					Common.debug("AUTO:DrivingForward");
 				}
 				break;
 				
@@ -197,13 +204,13 @@ public class Auto {
 	private void shootAction(){
 		switch(state) {
 			case DRIVE_HOPPER:
-				dt.driveDistance(-105 + 7+7 + halfRobotWidth);
+				dt.driveDistance(-105 + 13 + halfRobotWidth);
 				Robot.getThrower().retractFlipper();
 				state = SLIDE_HOPPER;
 				break;
 			case SLIDE_HOPPER:
 				if (dt.driveComplete()) {
-					timer = Common.time() + 1500;
+					timer = Common.time() + 1000;
 					state = SLIDE_STOP;
 				}else{
 					dt.drivebyPID();
@@ -213,7 +220,7 @@ public class Auto {
 				double slide = (alliance == RED) ? -1.0 : 1.0;
 				dt.setDrive(0, -dt.getHeading().turnRate(), slide);
 				if (Common.time() >= timer) {
-					timer = Common.time()+1500;
+					timer = Common.time()+2000;
 					state = SLIDE_AWAY;
 				}
 				break;
@@ -228,7 +235,9 @@ public class Auto {
 				dt.setDrive(0, -dt.getHeading().turnRate(), ((alliance==RED) ? 0.5:-0.5));
 				if(Common.time() >= timer) {
 					Robot.getThrower().intakeOn();
-					dt.driveDistance(60+10-7);
+					dt.driveDistance(60-14);
+					Robot.getThrower().state.spinUp();
+
 					state = PIVOT_BOILER;
 				}
 				break;
@@ -239,8 +248,6 @@ public class Auto {
 						dt.turnTo(-45);
 					else
 						dt.turnTo(45);
-					
-					Robot.getThrower().state.spinUp();
 					state = SPIN_UP;
 				}else{
 					dt.drivebyPID();
@@ -257,7 +264,7 @@ public class Auto {
 				}
 				break;
 			case SMASH:
-				timer = Common.time()+250;
+				timer = Common.time()+0;
 				state = SHOOT;
 				break;
 			case SHOOT:

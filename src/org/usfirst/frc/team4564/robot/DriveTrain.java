@@ -56,6 +56,7 @@ public class DriveTrain extends RobotDrive {
 		encoder.reset();
 		heading.reset();
 		drivePID.reset();
+		resetDrive();
 	}
 	
 	public void update() {
@@ -173,6 +174,7 @@ public class DriveTrain extends RobotDrive {
     }
     public void resetDrive() {
     	driveComp = () -> true;
+    	compCount = 0;
     }
     
     public boolean driveComplete() {

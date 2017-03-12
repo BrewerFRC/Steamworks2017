@@ -2,6 +2,7 @@ package org.usfirst.frc.team4564.robot;
 
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The Gear Vision autonomous subsystem.
@@ -92,6 +93,7 @@ public class GearVision {
 		if (reached) {
 			if(slide == 0 || aligned) {
 				if (bat.getDistance() < 13){
+					SmartDashboard.putBoolean("GearComplete", complete);
 					complete = true;
 					if(bat.getDistance() <10){
 						forward = 0.58;
@@ -99,7 +101,7 @@ public class GearVision {
 						forward = 0;
 					}
 				}else{
-					forward = -0.6;
+					forward = -0.65;
 				}
 				aligned = true;
 				slide = 0;
@@ -116,7 +118,6 @@ public class GearVision {
 			if(forwardPower > .7 ) {
 				forwardPower = .7;
 			}
-			forwardPower = .58;
 			//Adjust heading target based on turn.
 			if((distance > 40) && distance != 704) {
 				Robot.getDriveTrain().getHeading().incrementTargetAngle(-rawTurn);
