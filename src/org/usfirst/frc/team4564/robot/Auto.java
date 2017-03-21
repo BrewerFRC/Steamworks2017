@@ -17,10 +17,10 @@ public class Auto {
 	private static final int RED = 0, BLUE = 1;
 	private static final int halfRobotWidth = 36/2;
 	
-	private static final double WALL_TO_RIGHT_GEAR_RED = 89.5;
-	private static final double WALL_TO_RIGHT_GEAR_BLUE = 93.8;
-	private static final double WALL_TO_LEFT_GEAR_RED = 93.8;
-	private static final double WALL_TO_LEFT_GEAR_BLUE = 89.5;
+	private static final double WALL_TO_RIGHT_GEAR_RED = 88;
+	private static final double WALL_TO_RIGHT_GEAR_BLUE = 84;
+	private static final double WALL_TO_LEFT_GEAR_RED = 84;
+	private static final double WALL_TO_LEFT_GEAR_BLUE = 88;
 	private static final double WALL_TO_BASELINE = 114.3;
 	private static final double WALL_TO_LAUNCHPAD_LINE = 184.8;
 	private static final double FIELD_LENGTH = 652;
@@ -70,20 +70,20 @@ public class Auto {
 		
 			case RIGHT:
 				if(alliance == RED) {
-					distance = WALL_TO_RIGHT_GEAR_RED - halfRobotWidth - 10;
+					distance = WALL_TO_RIGHT_GEAR_RED - halfRobotWidth;
 					turn = -60;
 				} else {
-					distance = WALL_TO_RIGHT_GEAR_BLUE - halfRobotWidth-8;
+					distance = WALL_TO_RIGHT_GEAR_BLUE - halfRobotWidth;
 					turn = -60;
 				}
 				break;
 				
 			case LEFT:
 				if(alliance == RED) {
-					distance = WALL_TO_LEFT_GEAR_RED - halfRobotWidth-8;
+					distance = WALL_TO_LEFT_GEAR_RED - halfRobotWidth;
 					turn = 60;
 				} else {
-					distance = WALL_TO_LEFT_GEAR_BLUE - halfRobotWidth-10;
+					distance = WALL_TO_LEFT_GEAR_BLUE - halfRobotWidth;
 					turn = 60;
 				}
 				break;
@@ -139,14 +139,24 @@ public class Auto {
 				break;
 			case GEAR_VISION:
 				if(GearVision.i.complete && !wasComplete){
-					 timer = Common.time()+3000;
+					 timer = Common.time()+4000;
 					 wasComplete = true;
 					 Common.debug("AUTO:gearvision Complete");
 				}
-				if(Common.time() >= timer && wasComplete == true && ((sprint != POST_STOP)|| startingPosition != CENTER)){
+				/*if(Common.time() >= timer && wasComplete == true && ((sprint != POST_STOP)|| startingPosition != CENTER)){
 					Common.debug("AUTO:backUp");
 					state = BACKUP;
-				}else{
+				}*/
+				if(Common.time() >= timer && wasComplete == true){
+					if (sprint != POST_STOP || startingPosition != CENTER) {
+						Common.debug("AUTO:backUp");
+						state = BACKUP;
+					}
+					else {
+						state = STOP;
+					}
+				}
+				else{
 					GearVision.i.track();
 					dt.setDrive(GearVision.i.forward(),GearVision.i.turn() , GearVision.i.slide());
 				}
@@ -204,7 +214,7 @@ public class Auto {
 	private void shootAction(){
 		switch(state) {
 			case DRIVE_HOPPER:
-				dt.driveDistance(-105 + 13 + halfRobotWidth);
+				dt.driveDistance(-108+6+6 + halfRobotWidth);
 				Robot.getThrower().retractFlipper();
 				state = SLIDE_HOPPER;
 				break;
@@ -235,7 +245,7 @@ public class Auto {
 				dt.setDrive(0, -dt.getHeading().turnRate(), ((alliance==RED) ? 0.5:-0.5));
 				if(Common.time() >= timer) {
 					Robot.getThrower().intakeOn();
-					dt.driveDistance(60-14);
+					dt.driveDistance(68-12-3);
 					Robot.getThrower().state.spinUp();
 
 					state = PIVOT_BOILER;

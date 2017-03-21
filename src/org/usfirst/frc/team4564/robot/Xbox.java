@@ -157,5 +157,12 @@ public class Xbox extends XboxController{
 			return deadzone(this.getRightTrigger()) > 0;
 		});
 		whenMap.put("rightTrigger", false);
+		
+		functionMap.put("rightThumb", () -> {
+			return this.getRawButton(10);
+		});
+		whenMap.put("rightThumb", false);
+		
+		
 	}
 }

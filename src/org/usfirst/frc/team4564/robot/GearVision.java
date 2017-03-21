@@ -92,17 +92,19 @@ public class GearVision {
 		}
 		if (reached) {
 			if(slide == 0 || aligned) {
-				if (bat.getDistance() < 13){
+				/*if (bat.getDistance() < 11){
 					SmartDashboard.putBoolean("GearComplete", complete);
 					complete = true;
-					if(bat.getDistance() <10){
+					if(bat.getDistance() <8){
 						forward = 0.58;
 					}else{
 						forward = 0;
 					}
 				}else{
 					forward = -0.65;
-				}
+				}*/
+				complete = true;
+				forward = -0.65;
 				aligned = true;
 				slide = 0;
 				turn = -Robot.getDriveTrain().getHeading().turnRate();

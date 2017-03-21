@@ -60,6 +60,10 @@ public class Thrower {
 		flipper = new Servo(Constants.SERVO);
 		SmartDashboard.putNumber("Target Flywheel RPM", flywheelRPM);
 		SmartDashboard.getNumber("feederRate", feederRate);
+		
+		SmartDashboard.putBoolean("intakeState", false);
+		SmartDashboard.putBoolean("FlipperState", false);
+
 	}
 	
 	/**
@@ -71,11 +75,13 @@ public class Thrower {
 		return flywheel1.getEncVelocity()/10240.0*1500;
 	}
 	public void deployFlipper() {
+			SmartDashboard.putBoolean("FlipperState", true);
 			flipper.set(1);
 	}
 	
 	public void retractFlipper() {
-			flipper.set(-1);
+		SmartDashboard.putBoolean("FlipperState", true);
+		flipper.set(-1);
 	}
 	
 	/**
@@ -119,6 +125,7 @@ public class Thrower {
 	public void intakeOn() {
 		puke = false;
 		intakeState = 1;
+		SmartDashboard.putBoolean("intakeState", true);
 		Common.debug("Turing On Intake");
 	}
 	
@@ -126,6 +133,7 @@ public class Thrower {
 	 * Turns intake backward.
 	 */
 	public void intakeBackward() {
+		SmartDashboard.putBoolean("intakeState", true);
 		puke = true;
 		intakeState = -1;
 	}
@@ -134,6 +142,7 @@ public class Thrower {
 	 * Shuts off the external intake.
 	 */
 	public void intakeOff() {
+		SmartDashboard.putBoolean("intakeState", false);
 		puke = false;
 		intakeState = 0;
 		Common.debug("Turing Off Intake");

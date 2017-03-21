@@ -72,6 +72,7 @@ public class Robot extends SampleRobot {
     	//thrower.deployFlipper();
     	long time;
     	boolean wasFiring = false;
+    	boolean climbHold = false;
     	boolean wasGear = false;
     	gearVision.reset();
     	while (isEnabled() && isOperatorControl()) {
@@ -124,15 +125,28 @@ public class Robot extends SampleRobot {
     		dt.accelDrive(forward, turn, slide);
     		SmartDashboard.putNumber("sonic", gearVision.sonicDistance());
     		//Climber
+    		if(j1.when("rightThumb")){
+    			climbHold = !climbHold;
+    		}
     		if (joystickY(GenericHID.Hand.kRight) < -0.2) {
     			climber.setPower(joystickY(GenericHID.Hand.kRight));
     		}
     		else if (joystickY(GenericHID.Hand.kRight) > 0.2) {
     			climber.setPower(joystickY(GenericHID.Hand.kRight));
     		}
-    		else {
+    		else if(climbHold){
+    			climber.setPower(-0.5);
+    		}else{
     			climber.stop();
     		}
+    		if(climbHold){
+    			j1.setRumble(RumbleType.kLeftRumble, .2);
+    			j1.setRumble(RumbleType.kRightRumble, .2);
+    		}else{
+    			j1.setRumble(RumbleType.kLeftRumble, 0);
+    			j1.setRumble(RumbleType.kRightRumble, 0);
+    		}
+    		SmartDashboard.putBoolean("climbHold", climbHold);
     		
     		//Thrower
     		if (j1.when("a") || j0.when("a")) {
@@ -215,6 +229,9 @@ public class Robot extends SampleRobot {
      * @return double the value.
      */
     public double joystickX(GenericHID.Hand hand) {
+    	if (hand == GenericHID.Hand.kLeft) {
+    		return (Math.abs(j0.getX(hand)) > Math.abs(j1.getX(hand))) ? j0.getX(hand) : j1.getX(hand);
+    	}
     	return (Math.abs(j0.getX(hand)) > Math.abs(j1.getX(hand))) ? j0.getX(hand) : j1.getX(hand);
     }
     
@@ -225,6 +242,9 @@ public class Robot extends SampleRobot {
      * @return double the value.
      */
     public double joystickY(GenericHID.Hand hand) {
+    	if (hand == GenericHID.Hand.kLeft) {
+    		return (Math.abs(j0.getY(hand)) > Math.abs(j1.getY(hand))) ? j0.getY(hand) : -j1.getY(hand);
+    	}
     	return (Math.abs(j0.getY(hand)) > Math.abs(j1.getY(hand))) ? j0.getY(hand) : j1.getY(hand);
     }
     
@@ -235,7 +255,7 @@ public class Robot extends SampleRobot {
      * @return double the value.
      */
     public double joystickTrigger(GenericHID.Hand hand) {
-    	return (Math.abs(j0.getTriggerAxis(hand)) > Math.abs(j1.getTriggerAxis(hand))) ? j0.getTriggerAxis(hand) : j1.getTriggerAxis(hand);
+    	return (Math.abs(j0.getTriggerAxis(hand)) > Math.abs(j1.getTriggerAxis(hand))) ? j0.getTriggerAxis(hand) : -j1.getTriggerAxis(hand);
     }
     
     /**
