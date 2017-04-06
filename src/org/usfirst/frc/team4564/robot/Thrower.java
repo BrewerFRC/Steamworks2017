@@ -24,12 +24,12 @@ public class Thrower {
 	public static Xbox j = new Xbox(0);
 	
 	public ThrowerState state;
-	private static int flywheelRPM = 2900; //Ideal RPM target for flywheel.
+	private static int flywheelRPM = 2800; //Ideal RPM target for flywheel.
 	private static  double feederRate = -0.28;  //Ideal RPM for flywheel feeder.
 	private static final double intakeRate = 1.0;
-	private static final double P = 1.5e-5;
-	private static final double I = 5.0e-11;
-	private static final double D = 0.006;
+	private static final double P = 1.0e-5;
+	private static final double I = 0;
+	private static final double D = 0.01;
 	
 	private boolean engaged = false;
 	public int intakeState; //-1 puke, 0 off, 1 intake

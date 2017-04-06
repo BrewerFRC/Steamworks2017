@@ -129,13 +129,13 @@ public class Robot extends SampleRobot {
     			climbHold = !climbHold;
     		}
     		if (joystickY(GenericHID.Hand.kRight) < -0.2) {
-    			climber.setPower(joystickY(GenericHID.Hand.kRight));
+    			climber.setPower(-joystickY(GenericHID.Hand.kRight));
     		}
     		else if (joystickY(GenericHID.Hand.kRight) > 0.2) {
-    			climber.setPower(joystickY(GenericHID.Hand.kRight));
+    			climber.setPower(-joystickY(GenericHID.Hand.kRight));
     		}
     		else if(climbHold){
-    			climber.setPower(-0.5);
+    			climber.setPower(0.4);
     		}else{
     			climber.stop();
     		}
