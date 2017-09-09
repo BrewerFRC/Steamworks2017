@@ -214,7 +214,7 @@ public class Auto {
 	private void shootAction(){
 		switch(state) {
 			case DRIVE_HOPPER:
-				dt.driveDistance(-108+6+6 + halfRobotWidth);
+				dt.driveDistance(-108+6 + halfRobotWidth);
 				Robot.getThrower().retractFlipper();
 				state = SLIDE_HOPPER;
 				break;
