@@ -18,7 +18,7 @@ public class GearVision {
 	public static final int MAX_ALIGN_DISTANCE = 150;
 	
 	private Solenoid ringLight;
-	private NetworkTable table;
+	private NetworkTable table;	
 	private Bat bat;
 	
 	private boolean reached;
@@ -34,6 +34,7 @@ public class GearVision {
 		table = NetworkTable.getTable("visionTracking");
 		ringLight = new Solenoid(Constants.SOL_VISION_RINGLIGHT);
 		bat = new Bat();
+		SmartDashboard.putNumber("GearDistance", 704);
 	}
 	
 	public boolean checkReady() {
@@ -65,6 +66,8 @@ public class GearVision {
 	 */
 	public void track() {
 		double distance = rawDistance();
+		SmartDashboard.putNumber("GearDistance", distance);
+		
 		
 		//Slide calculation
 		double rawSlide = -rawSlide() / 3.0;
@@ -104,6 +107,7 @@ public class GearVision {
 					forward = -0.65;
 				}*/
 				complete = true;
+				Robot.getThrower().deployFlipper();
 				forward = -0.65;
 				aligned = true;
 				slide = 0;
@@ -121,9 +125,6 @@ public class GearVision {
 				forwardPower = .7;
 			}
 			//Adjust heading target based on turn.
-			if((distance > 40) && distance != 704) {
-				Robot.getDriveTrain().getHeading().incrementTargetAngle(-rawTurn);
-			}
 			
 			forward = -forwardPower;
 			slide = -rawSlide;

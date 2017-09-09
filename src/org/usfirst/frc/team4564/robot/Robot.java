@@ -180,6 +180,8 @@ public class Robot extends SampleRobot {
     		}
     		SmartDashboard.putNumber("throwerRPM", thrower.getRPM());
     		SmartDashboard.putNumber("slide", slide);
+    		SmartDashboard.putNumber("angle", dt.getHeading().getAngle());
+    		SmartDashboard.putNumber("targetAngle", dt.getHeading().getTargetAngle());
     		
     		//Update subsystems.
     		thrower.update();
