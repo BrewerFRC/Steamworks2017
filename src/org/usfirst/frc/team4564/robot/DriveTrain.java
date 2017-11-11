@@ -3,10 +3,10 @@ package org.usfirst.frc.team4564.robot;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The drive train subsystem; slide drive.
@@ -182,7 +182,6 @@ public class DriveTrain extends RobotDrive {
     		compCount = 0;
     	}
     	compCount += (driveComp.get()) ? 1 : 0;
-    	Common.debug("DT:driveCompleteCount increased" + compCount);
       	return compCount == 3;
     }
     
@@ -193,5 +192,13 @@ public class DriveTrain extends RobotDrive {
     public double calcDrive() {
     	//Common.debug("DT:CalcDrive");
     	return drivePID.calc(encoder.getDistance());
+    }
+    
+    public double getDistance() {
+    	return encoder.getDistance();
+    }
+    
+    public double getTargetDistance() {
+    	return drivePID.getTarget();
     }
 }

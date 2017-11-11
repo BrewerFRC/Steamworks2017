@@ -53,11 +53,16 @@ public class Robot extends SampleRobot {
     public void autonomous() {
     	dt.init();
     	auto.init();
+    	thrower.setTeleop(false);
     	while (isEnabled() && isAutonomous()) {
     		long time = Common.time();
     		
     		auto.auto();
 //    		Common.debug("Autoning");
+    		SmartDashboard.putNumber("distance", dt.getDistance());
+    		SmartDashboard.putNumber("targetDistance", dt.getTargetDistance());
+    		SmartDashboard.putNumber("angle", dt.getHeading().getAngle());
+    		SmartDashboard.putNumber("targetAngle", dt.getHeading().getTargetAngle());
     		
     		double delay = (1000.0/Constants.REFRESH_RATE - (Common.time() - time)) / 1000.0;
      	    Timer.delay((delay > 0) ? delay : 0.001);
@@ -69,6 +74,7 @@ public class Robot extends SampleRobot {
      */
     public void operatorControl() {
     	dt.init();
+    	thrower.setTeleop(true);
     	//thrower.deployFlipper();
     	long time;
     	boolean wasFiring = false;
@@ -170,13 +176,16 @@ public class Robot extends SampleRobot {
     			thrower.deployFlipper();
     		}
     		
-    		if (j1.getPressed("b") || j0.getPressed("b")) {
+    		/*if (j1.getPressed("b") || j0.getPressed("b")) {
     			wasFiring = true;
     			thrower.state.fire();
     		}
     		else if (wasFiring) {
     			wasFiring = false;
     			thrower.state.stopFiring();
+    		}*/
+    		if (j1.when("b") || j0.when("b")) {
+    			thrower.state.fire();
     		}
     		SmartDashboard.putNumber("throwerRPM", thrower.getRPM());
     		SmartDashboard.putNumber("slide", slide);

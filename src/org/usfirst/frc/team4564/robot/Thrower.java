@@ -35,6 +35,7 @@ public class Thrower {
 	public int intakeState; //-1 puke, 0 off, 1 intake
 	private boolean shooting;
 	private boolean puke;
+	private boolean teleop = false;
 	
 	/**
 	 * Instantiates a new Thrower subsystem with the defined PID values.
@@ -64,6 +65,13 @@ public class Thrower {
 		SmartDashboard.putBoolean("intakeState", false);
 		SmartDashboard.putBoolean("FlipperState", false);
 
+	}
+	
+	public void setTeleop(boolean teleop) {
+		this.teleop = teleop;
+	}
+	public boolean isTeleop() {
+		return this.teleop;
 	}
 	
 	/**
@@ -202,6 +210,7 @@ public class Thrower {
 		public static final int INIT  = 0; //Any initilazation steps
 		public static final int READY = 1;  //Ready to begin firing process
 		public static final int SPIN_UP = 2;  //Spin up flywheel to set RPM
+		public static final int PRE_SPIN_UP = 7;
 		public static final int READY_TO_FIRE = 3;  //Flywheel up to input speed
 		public static final int FIRE = 4;  //Flywheel feeder intakes ball at feeder rate
 		public static final int CLEAR_SHOOTER = 5;  //Stop motors, run feeder back to clear channel.
@@ -209,7 +218,7 @@ public class Thrower {
 		
 		private Thrower thrower;
 		public int currentState;
-		public long clearTimer,flipperDelay = 0;
+		public long clearTimer,flipperDelay = 0, feederDelay = 0;
 		public boolean fire = false;
 		public boolean flipperCheck;
 		
@@ -228,9 +237,13 @@ public class Thrower {
 			if(currentState == READY_TO_FIRE) {
 				Common.debug("Flywheel up to speed: Firing");
 				currentState = FIRE;
-			} else { 
+			} 
+			else if (currentState == FIRE && thrower.isTeleop()) {
+				 stopFiring();
+			}
+			else {
 				Common.debug("Flywheel not up to speed: begining firing process");
-				currentState = SPIN_UP;
+				currentState = PRE_SPIN_UP;
 			}
 		}
 		
@@ -239,7 +252,7 @@ public class Thrower {
 		 */
 		public void spinUp() {
 			flywheelPID.reset();
-			currentState = SPIN_UP;
+			currentState = PRE_SPIN_UP;
 		}
 		
 		/**
@@ -259,21 +272,35 @@ public class Thrower {
 				case READY:
 					break;
 					
+				case PRE_SPIN_UP:
+					feederDelay = Common.time() + 3000;
+					currentState = SPIN_UP;
+					break;
+				
 				case SPIN_UP:
 					flipperCheck = false;
 					Common.debug("SPIN_UP: Spinning up flywheel");
 					thrower.setSpeed(flywheelRPM);
 					thrower.intakeOn();
-					if(thrower.ready() && fire) {
-						currentState = READY_TO_FIRE;
-					} else {
-						currentState = SPIN_UP;
+					//Use timed feeder in teleop
+					if (thrower.isTeleop()) {
+						if(Common.time() >= feederDelay && fire) {
+							currentState = READY_TO_FIRE;
+						}
+					}
+					//Revert to RPM feeder in autonomous
+					else {
+						if(thrower.ready() && fire) {
+							currentState = READY_TO_FIRE;
+						}
 					}
 					break;
 					
 				case READY_TO_FIRE:
-					Common.debug("READY_TO_FIRE: Flywheel up to speed");
-					currentState = FIRE;
+					if (!thrower.isTeleop()) {
+						Common.debug("READY_TO_FIRE: Flywheel up to speed");
+						currentState = FIRE;
+					}
 					break;
 					
 				case FIRE:
