@@ -273,6 +273,7 @@ public class Thrower {
 				case PRE_SPIN_UP:
 					feederDelay = Common.time() + 3000;
 					currentState = SPIN_UP;
+					Common.dashBool("readyToFire", false);
 					break;
 				
 				case SPIN_UP:
@@ -283,6 +284,7 @@ public class Thrower {
 					//Use timed feeder in teleop
 					if (thrower.isTeleop()) {
 						if(Common.time() >= feederDelay && fire) {
+							Common.dashBool("readyToFire", true);
 							currentState = READY_TO_FIRE;
 						}
 					}
