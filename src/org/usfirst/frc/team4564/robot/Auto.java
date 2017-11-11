@@ -114,7 +114,7 @@ public class Auto {
 	private void gearAction(){
 		switch(state) {
 			case DRIVE_TO_GEAR:
-				Robot.getThrower().deployFlipper();
+				Robot.getThrower().retractFlipper();
 				Common.debug("Driving to the target :" + distance);
 				dt.driveDistance(distance);
 				state = TURN_TO_GEAR;

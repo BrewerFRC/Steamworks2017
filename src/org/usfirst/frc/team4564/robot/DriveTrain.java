@@ -129,6 +129,7 @@ public class DriveTrain extends RobotDrive {
     	arcadeDrive(drive, turn);
     	SlideL.set(slide);
     	SlideR.set(-slide);
+    	Common.dashNum("ForwardPower", drive);
     }
     
     public void drivebyPID()
@@ -182,6 +183,7 @@ public class DriveTrain extends RobotDrive {
     		compCount = 0;
     	}
     	compCount += (driveComp.get()) ? 1 : 0;
+
       	return compCount == 3;
     }
     

@@ -25,7 +25,7 @@ public class Thrower {
 	
 	public ThrowerState state;
 	private static int flywheelRPM = 2800; //Ideal RPM target for flywheel.
-	private static  double feederRate = -0.28;  //Ideal RPM for flywheel feeder.
+	private static  double feederRate = -0.75;  //Ideal RPM for flywheel feeder.
 	private static final double intakeRate = 1.0;
 	private static final double P = 1.0e-5;
 	private static final double I = 0;
@@ -134,7 +134,6 @@ public class Thrower {
 		puke = false;
 		intakeState = 1;
 		SmartDashboard.putBoolean("intakeState", true);
-		Common.debug("Turing On Intake");
 	}
 	
 	/**
@@ -153,7 +152,6 @@ public class Thrower {
 		SmartDashboard.putBoolean("intakeState", false);
 		puke = false;
 		intakeState = 0;
-		Common.debug("Turing Off Intake");
 	}
 	
 	/**
